@@ -12,6 +12,7 @@ RUN apk --update --no-cache --progress add ca-certificates
 
 FROM scratch
 COPY --from=builder /go/src/port-checker/port-checker /port-checker
+COPY *.html /
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 80
 ENTRYPOINT ["/port-checker"]

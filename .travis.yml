@@ -4,4 +4,4 @@ services:
 install:
   - docker build .
 after_script:
-  - "curl -X POST https://hooks.microbadger.com/images/qmcgaw/port-checker/"
+  - "curl -X POST https://hooks.microbadger.com/images/qmcgaw/port-checker//d8zbXT9JDvYGqqm9kx3eUcVCunc="
