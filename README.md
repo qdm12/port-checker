@@ -53,3 +53,4 @@ It uses [https://ipinfo.com](https://ipinfo.com) to obtain extra information abo
 
 - [ ] Add CSS to the HTML template
 - [ ] Add Google Maps to show the location
+- [ ] Unit testing and code refactoring

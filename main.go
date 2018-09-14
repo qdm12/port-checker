@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"text/template"
 	"time"
 
@@ -20,6 +21,14 @@ type HtmlData struct {
 	Browser     string
 	Device      string
 	OS          string
+}
+
+var indexPath = "index.html" // depends if in Docker with Scratch, we must hardcode it
+
+func init() {
+	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+		indexPath = "/index.html"
+	}
 }
 
 // TODO Google Maps with lat, long
@@ -47,7 +56,7 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		device,
 		os,
 	}
-	t := template.Must(template.ParseFiles("index.html"))
+	t := template.Must(template.ParseFiles(indexPath))
 	err = t.ExecuteTemplate(w, "index.html", data)
 	if err != nil {
 		log.Println(err)

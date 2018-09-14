@@ -49,9 +49,11 @@ func isPrivate(address string) (bool, error) {
 func getClientIP(r *http.Request) (ip string, pubIP string, err error) {
 	xRealIP := r.Header.Get("X-Real-Ip")
 	xForwardedFor := r.Header.Get("X-Forwarded-For")
+	rRemoteAddress := r.RemoteAddr
+	log.Println("Received X-Real-Ip='" + xRealIP + "' X-Forwarded-For='" + xForwardedFor + "' remoteAddr='" + rRemoteAddress + "'")
 	var ipIsPrivate bool
 	if xRealIP == "" && xForwardedFor == "" {
-		ip = r.RemoteAddr
+		ip = rRemoteAddress
 		if strings.ContainsRune(ip, ':') {
 			ip, _, err = net.SplitHostPort(ip)
 			if err != nil {
@@ -72,8 +74,8 @@ func getClientIP(r *http.Request) (ip string, pubIP string, err error) {
 		}
 		return ip, pubIP, nil
 	}
-	for _, ip := range strings.Split(xForwardedFor, ",") {
-		ip = strings.TrimSpace(ip)
+	for _, forwardedIp := range strings.Split(xForwardedFor, ",") {
+		ip = strings.TrimSpace(forwardedIp)
 		ipIsPrivate, err = isPrivate(ip)
 		if err != nil {
 			log.Println(err)
@@ -82,6 +84,13 @@ func getClientIP(r *http.Request) (ip string, pubIP string, err error) {
 		if !ipIsPrivate {
 			return ip, pubIP, nil
 		}
+	}
+	if xRealIP == "" { // only private IPs available
+		pubIP, err = getSelfPublicIP()
+		if err != nil {
+			return ip, pubIP, err
+		}
+		return ip, pubIP, nil
 	}
 	ip = xRealIP
 	ipIsPrivate, err = isPrivate(ip)
