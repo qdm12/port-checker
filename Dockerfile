@@ -7,9 +7,9 @@ WORKDIR /go/src/port-checker
 COPY *.go ./
 RUN go get -v ./... && \
     go test -v && \
-    CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -installsuffix cgo -o updater . && \
-    upx -v --best --ultra-brute --overlay=strip updater && \
-    upx -t updater
+    CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -installsuffix cgo -o port-checker . && \
+    upx -v --best --ultra-brute --overlay=strip port-checker && \
+    upx -t port-checker
 
 FROM scratch
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
