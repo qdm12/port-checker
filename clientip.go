@@ -29,7 +29,7 @@ type ipInfoType struct {
 }
 
 func getLocationFromIP(ip string) (information *ipInfoType, err error) {
-	content, err := getRequest("https://ipinfo.io/"+ip+"/json", 1500)
+	content, err := getRequest("https://ipinfo.io/"+ip+"/json", httpGetTimeout)
 	if err != nil {
 		return nil, err
 	}

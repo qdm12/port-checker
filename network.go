@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const httpGetTimeout = 15000
+
 func getRequest(url string, timeout int) (content []byte, err error) {
 	client := &http.Client{Timeout: time.Duration(timeout) * time.Millisecond}
 	request, err := http.NewRequest("GET", url, nil)
