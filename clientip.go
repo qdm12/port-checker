@@ -1,122 +1,42 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"log"
-	"net"
-	"net/http"
-	"os"
-	"strings"
+	"regexp"
 )
 
-var cidrs []*net.IPNet
-
-func init() {
-	maxCidrBlocks := [8]string{
-		"127.0.0.1/8",    // localhost
-		"10.0.0.0/8",     // 24-bit block
-		"172.16.0.0/12",  // 20-bit block
-		"192.168.0.0/16", // 16-bit block
-		"169.254.0.0/16", // link local address
-		"::1/128",        // localhost IPv6
-		"fc00::/7",       // unique local address IPv6
-		"fe80::/10",      // link local address IPv6
-	}
-	for _, maxCidrBlock := range maxCidrBlocks {
-		_, cidr, err := net.ParseCIDR(maxCidrBlock)
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		cidrs = append(cidrs, cidr)
-	}
-}
-
-func isPrivate(address string) (bool, error) {
-	ipAddress := net.ParseIP(address)
-	if ipAddress == nil {
-		return false, errors.New("address is not valid")
-	}
-	for i := range cidrs {
-		if cidrs[i].Contains(ipAddress) {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func getClientIP(r *http.Request) (ip string, pubIP string, err error) {
-	xRealIP := r.Header.Get("X-Real-Ip")
-	xForwardedFor := r.Header.Get("X-Forwarded-For")
-	rRemoteAddress := r.RemoteAddr
-	log.Println("Received X-Real-Ip='" + xRealIP + "' X-Forwarded-For='" + xForwardedFor + "' remoteAddr='" + rRemoteAddress + "'")
-	var ipIsPrivate bool
-	if xRealIP == "" && xForwardedFor == "" {
-		ip = rRemoteAddress
-		if strings.ContainsRune(ip, ':') {
-			ip, _, err = net.SplitHostPort(ip)
-			if err != nil {
-				return ip, pubIP, err
-			}
-		}
-		ipIsPrivate, err = isPrivate(ip)
-		if err != nil {
-			return ip, pubIP, err
-		}
-		if ipIsPrivate {
-			pubIP, err = getSelfPublicIP()
-			if err != nil {
-				return ip, pubIP, err
-			}
-		} else {
-			pubIP = ip
-		}
-		return ip, pubIP, nil
-	}
-	for _, forwardedIp := range strings.Split(xForwardedFor, ",") {
-		ip = strings.TrimSpace(forwardedIp)
-		ipIsPrivate, err = isPrivate(ip)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		if !ipIsPrivate {
-			return ip, pubIP, nil
-		}
-	}
-	if xRealIP == "" { // only private IPs available
-		pubIP, err = getSelfPublicIP()
-		if err != nil {
-			return ip, pubIP, err
-		}
-		return ip, pubIP, nil
-	}
-	ip = xRealIP
-	ipIsPrivate, err = isPrivate(ip)
-	if err != nil {
-		return ip, pubIP, err
-	}
-	if ipIsPrivate {
-		pubIP, err = getSelfPublicIP()
-		if err != nil {
-			return ip, pubIP, err
-		}
-	} else {
-		pubIP = ip
-	}
-	return ip, pubIP, nil
-}
+var regexIP = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`).FindString
 
 func getSelfPublicIP() (pubIp string, err error) {
-	response, err := getRequest("https://ipinfo.io/ip", 1500)
+	content, err := getRequest("https://duckduckgo.com/?q=ip", 2500)
 	if err != nil {
 		return pubIp, err
 	}
-	content, err := ioutil.ReadAll(response.Body)
-	response.Body.Close()
-	if err != nil {
-		return pubIp, err
+	pubIp = regexIP(string(content))
+	if pubIp == "" {
+		return pubIp, errors.New("No public IP found on duckduck.go")
 	}
-	return string(content), nil
+	return pubIp, nil
+}
+
+type ipInfoType struct {
+	City    string `json:"city"`
+	Region  string `json:"region"`
+	Country string `json:"country"`
+	GPS     string `json:"loc"`
+	ISP     string `json:"org"`
+}
+
+func getLocationFromIP(ip string) (information *ipInfoType, err error) {
+	content, err := getRequest("https://ipinfo.io/"+ip+"/json", 1500)
+	if err != nil {
+		return nil, err
+	}
+	information = new(ipInfoType)
+	err = json.Unmarshal(content, &information)
+	if err != nil {
+		return nil, err
+	}
+	return information, nil
 }

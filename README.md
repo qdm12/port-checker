@@ -18,11 +18,11 @@ Scratch based Docker container to test if a port works using a Golang server
 
 | Download size | Image size | RAM usage | CPU usage |
 | --- | --- | --- | --- |
-| 2.7MB | 6.97MB | 5.3MB | Very low |
+| 2.5MB | 2.3MB | 5.3MB | Very low |
 
 Based on:
 
-- Scratch with the Golang binary
+- Scratch with the Golang binary compressed with UPX
 - Ca-Certificates
 
 ## Setup

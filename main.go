@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"text/template"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -68,17 +67,4 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", Index)
 	log.Fatal(http.ListenAndServe(":80", router))
-}
-
-func getRequest(url string, timeout int) (response *http.Response, err error) {
-	client := &http.Client{Timeout: time.Duration(timeout) * time.Millisecond}
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	response, err = client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
 }
