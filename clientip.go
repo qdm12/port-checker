@@ -9,7 +9,7 @@ import (
 var regexIP = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`).FindString
 
 func getSelfPublicIP() (pubIp string, err error) {
-	content, err := getRequest("https://duckduckgo.com/?q=ip", 2500)
+	content, err := getRequest("https://duckduckgo.com/?q=ip", httpGetTimeout)
 	if err != nil {
 		return pubIp, err
 	}
