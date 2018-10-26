@@ -1,0 +1,13 @@
+version: '3'
+services:
+  port-checker:
+    build: .
+    image: qmcgaw/port-checker:latest
+    container_name: port-checker
+    restart: always
+    #network_mode: host
+    #environment:
+    #  - PORT=2345
+    network_mode: bridge
+    ports:
+      - 2345:80/tcp

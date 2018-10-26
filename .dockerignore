@@ -2,3 +2,5 @@
 .travis.yml
 .git/
 README.md
+port-checker
+port-checker.exe

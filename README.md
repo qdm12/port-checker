@@ -1,6 +1,6 @@
 # Port Checker with Docker
 
-Scratch based Docker container to test if a port works using a Golang server
+1.89MB container to check a port works with a Golang server
 
 [![Build Status](https://travis-ci.org/qdm12/port-checker.svg?branch=master)](https://travis-ci.org/qdm12/port-checker)
 [![Docker Build Status](https://img.shields.io/docker/build/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
@@ -18,14 +18,11 @@ Scratch based Docker container to test if a port works using a Golang server
 
 | Download size | Image size | RAM usage | CPU usage |
 | --- | --- | --- | --- |
-| 2.5MB | 2.3MB | 5.3MB | Very low |
-
-Based on:
-
-- Scratch with the Golang binary compressed with UPX
-- Ca-Certificates
+| ?MB | 1.89MB | 7.7MB | Very low |
 
 ## Setup
+
+### Check the port
 
 To test port 2345 simply run on the server:
 
@@ -35,22 +32,36 @@ docker run -it --rm -p 2345:80 qmcgaw/port-checker
 
 With a client, access [http://localhost:2345](http://localhost:2345)
 
+### Check the port and the IP address
+
+To test port 2345 simply run on the server:
+
+```bash
+docker run -it --rm --net host -e PORT=2345 qmcgaw/port-checker
+```
+
+With a client, access [http://localhost:2345](http://localhost:2345) and your IP address will be shown and not the Docker gateway one
+
+You can also port forward with your router to test it is accessible remotely.
+
+There is a *docker-compose.yml* file if you are interested.
+
 ## More information
 
 Displays the following information (through HTTP):
 
-- Client IP
-- Client Public IP (if client IP is private)
-- Client Location
-- Client ISP
+- Client IP (public or private)
 - Browser and version
 - Device type
 - OS and version
 
-It uses [https://ipinfo.com](https://ipinfo.com) to obtain extra information about your IP address.
-
 ## TO DOs
 
+- [ ] Emojis
+- [ ] Healthcheck
+- [ ] Precise port to check it can access itself at start
 - [ ] Add CSS to the HTML template
+- [ ] Use GeoLite database
 - [ ] Add Google Maps to show the location
 - [ ] Unit testing and code refactoring
+- [ ] Notifications (Pushbullet, email, etc. ?)

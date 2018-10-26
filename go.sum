@@ -1,0 +1,4 @@
+github.com/avct/uasurfer v0.0.0-20180927160713-2ce2c8fcd544 h1:kSERG18JdiEknfkAeCDd8NBhcOHzMvFkDpWSWHPtvdw=
+github.com/avct/uasurfer v0.0.0-20180927160713-2ce2c8fcd544/go.mod h1:noBAuukeYOXa0aXGqxr24tADqkwDO2KRD15FsuaZ5a8=
+github.com/julienschmidt/httprouter v1.2.0 h1:TDTW5Yz1mjftljbcKqRcrYhd4XeOoI98t+9HbQbYf7g=
+github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=

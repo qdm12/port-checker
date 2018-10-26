@@ -6,10 +6,12 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
 var cidrs []*net.IPNet
+var regexIP = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`).FindString
 
 func init() {
 	maxCidrBlocks := [8]string{
@@ -45,64 +47,34 @@ func isPrivate(address string) (bool, error) {
 	return false, nil
 }
 
-func getClientIP(r *http.Request) (ip string, pubIP string, err error) {
+func getClientIP(r *http.Request) (ip string, err error) {
 	xRealIP := r.Header.Get("X-Real-Ip")
 	xForwardedFor := r.Header.Get("X-Forwarded-For")
 	rRemoteAddress := r.RemoteAddr
 	log.Println("Received X-Real-Ip='" + xRealIP + "' X-Forwarded-For='" + xForwardedFor + "' remoteAddr='" + rRemoteAddress + "'")
-	var ipIsPrivate bool
 	if xRealIP == "" && xForwardedFor == "" {
 		ip = rRemoteAddress
 		if strings.ContainsRune(ip, ':') {
 			ip, _, err = net.SplitHostPort(ip)
 			if err != nil {
-				return ip, pubIP, err
+				return ip, err
 			}
 		}
-		ipIsPrivate, err = isPrivate(ip)
-		if err != nil {
-			return ip, pubIP, err
-		}
-		if ipIsPrivate {
-			pubIP, err = getSelfPublicIP()
-			if err != nil {
-				return ip, pubIP, err
-			}
-		} else {
-			pubIP = ip
-		}
-		return ip, pubIP, nil
+		return ip, nil
 	}
-	for _, forwardedIp := range strings.Split(xForwardedFor, ",") {
-		ip = strings.TrimSpace(forwardedIp)
-		ipIsPrivate, err = isPrivate(ip)
+	for _, forwardedIP := range strings.Split(xForwardedFor, ",") {
+		ip = strings.TrimSpace(forwardedIP)
+		ipIsPrivate, err := isPrivate(ip)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		if !ipIsPrivate {
-			return ip, pubIP, nil
+			return ip, nil
 		}
 	}
-	if xRealIP == "" { // only private IPs available
-		pubIP, err = getSelfPublicIP()
-		if err != nil {
-			return ip, pubIP, err
-		}
-		return ip, pubIP, nil
+	if xRealIP == "" { // latest private xForwardedFor IP
+		return ip, nil
 	}
-	ip = xRealIP
-	ipIsPrivate, err = isPrivate(ip)
-	if err != nil {
-		return ip, pubIP, err
-	}
-	if ipIsPrivate {
-		pubIP, err = getSelfPublicIP()
-		if err != nil {
-			return ip, pubIP, err
-		}
-	} else {
-		pubIP = ip
-	}
-	return ip, pubIP, nil
+	return xRealIP, nil
 }

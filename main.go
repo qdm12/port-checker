@@ -1,25 +1,24 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"text/template"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-type HtmlData struct {
-	ClientIP    string
-	ClientPubIP string
-	City        string
-	Region      string
-	Country     string
-	GPS         string
-	ISP         string
-	Browser     string
-	Device      string
-	OS          string
+const defaultListeningPort = "80"
+
+// HTMLData is used to contain data parsed for the Html template
+type HTMLData struct {
+	ClientIP string
+	Browser  string
+	Device   string
+	OS       string
 }
 
 var indexPath = "index.html" // depends if in Docker with Scratch, we must hardcode it
@@ -30,27 +29,20 @@ func init() {
 	}
 }
 
-// TODO Google Maps with lat, long
+// Index is the main web UI response
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	browser, device, os := getUserAgentDetails(r.Header.Get("User-Agent"))
-	clientIP, clientPubIP, err := getClientIP(r)
+	clientIP, err := getClientIP(r)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	ipInfo, err := getLocationFromIP(clientPubIP)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	data := HtmlData{
+	data := HTMLData{
 		clientIP,
-		clientPubIP,
-		ipInfo.City,
-		ipInfo.Region,
-		ipInfo.Country,
-		ipInfo.GPS,
-		ipInfo.ISP,
 		browser,
 		device,
 		os,
@@ -63,8 +55,29 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
+func parseEnv() (listeningPort string, err error) {
+	listeningPort = os.Getenv("PORT")
+	if listeningPort == "" {
+		listeningPort = defaultListeningPort
+	} else {
+		value, err := strconv.Atoi(listeningPort)
+		if err != nil {
+			return listeningPort, err
+		}
+		if value < 1 || value > 65535 {
+			return listeningPort, errors.New("Environment variable PORT " + listeningPort + " is out of range (1 to 65535)")
+		}
+	}
+	return listeningPort, nil
+}
+
 func main() {
+	listeningPort, err := parseEnv()
+	if err != nil {
+		log.Fatalln(err)
+	}
 	router := httprouter.New()
 	router.GET("/", Index)
-	log.Fatal(http.ListenAndServe(":80", router))
+	log.Println("Server started listening on port " + listeningPort)
+	log.Fatal(http.ListenAndServe(":"+listeningPort, router))
 }
