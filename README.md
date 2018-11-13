@@ -13,38 +13,33 @@
 [![Docker Stars](https://img.shields.io/docker/stars/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
 [![Docker Automated](https://img.shields.io/docker/automated/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
 
-[![](https://images.microbadger.com/badges/image/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
-[![](https://images.microbadger.com/badges/version/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
+[![Image size](https://images.microbadger.com/badges/image/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
+[![Image version](https://images.microbadger.com/badges/version/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
 
-| Download size | Image size | RAM usage | CPU usage |
-| --- | --- | --- | --- |
-| ?MB | 1.89MB | 7.7MB | Very low |
+| Image size | RAM usage | CPU usage |
+| --- | --- | --- |
+| 3.23MB | 8MB | Very low |
 
 ## Setup
 
-### Check the port
-
-To test port 2345 simply run on the server:
+To test port 1234, use:
 
 ```bash
-docker run -it --rm -p 2345:80 qmcgaw/port-checker
+docker run -d -p 1234:8000/tcp qmcgaw/port-checker
 ```
 
-With a client, access [http://localhost:2345](http://localhost:2345)
 
-### Check the port and the IP address
+or use [docker-compose.yml](https://github.com/qdm12/port-checker/blob/master/docker-compose.yml) with:
 
-To test port 2345 simply run on the server:
 
 ```bash
-docker run -it --rm --net host -e PORT=2345 qmcgaw/port-checker
+docker-compose up -d
 ```
 
-With a client, access [http://localhost:2345](http://localhost:2345) and your IP address will be shown and not the Docker gateway one
+
+With a client, access [http://localhost:1234](http://localhost:1234)
 
 You can also port forward with your router to test it is accessible remotely.
-
-There is a *docker-compose.yml* file if you are interested.
 
 ## More information
 
@@ -58,7 +53,6 @@ Displays the following information (through HTTP):
 ## TO DOs
 
 - [ ] Emojis
-- [ ] Healthcheck
 - [ ] Precise port to check it can access itself at start
 - [ ] Add CSS to the HTML template
 - [ ] Use GeoLite database

@@ -7,7 +7,7 @@ services:
     restart: always
     #network_mode: host
     #environment:
-    #  - PORT=2345
+    #  - PORT=1234
     network_mode: bridge
     ports:
-      - 2345:80/tcp
+      - 8000:8000/tcp

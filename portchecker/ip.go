@@ -47,34 +47,46 @@ func isPrivate(address string) (bool, error) {
 	return false, nil
 }
 
-func getClientIP(r *http.Request) (ip string, err error) {
-	xRealIP := r.Header.Get("X-Real-Ip")
-	xForwardedFor := r.Header.Get("X-Forwarded-For")
-	rRemoteAddress := r.RemoteAddr
-	log.Println("Received X-Real-Ip='" + xRealIP + "' X-Forwarded-For='" + xForwardedFor + "' remoteAddr='" + rRemoteAddress + "'")
-	if xRealIP == "" && xForwardedFor == "" {
-		ip = rRemoteAddress
-		if strings.ContainsRune(ip, ':') {
-			ip, _, err = net.SplitHostPort(ip)
+type ipHeaders struct {
+	ip            string
+	xRealIP       string
+	xForwardedFor string
+	remoteAddress string
+}
+
+func (ips *ipHeaders) String() string {
+	return ips.ip + "(xRealIP=" + ips.xRealIP +
+		", xForwardedFor=" + ips.xForwardedFor + ", remoteAddress=" +
+		ips.remoteAddress + ")"
+}
+
+func getClientIP(r *http.Request) (ips ipHeaders, err error) {
+	ips.xRealIP = r.Header.Get("X-Real-Ip")
+	ips.xForwardedFor = r.Header.Get("X-Forwarded-For")
+	ips.remoteAddress = r.RemoteAddr
+	if ips.xRealIP == "" && ips.xForwardedFor == "" {
+		ips.ip = ips.remoteAddress
+		if strings.ContainsRune(ips.ip, ':') {
+			ips.ip, _, err = net.SplitHostPort(ips.ip)
 			if err != nil {
-				return ip, err
+				return ips, err
 			}
 		}
-		return ip, nil
+		return ips, nil
 	}
-	for _, forwardedIP := range strings.Split(xForwardedFor, ",") {
-		ip = strings.TrimSpace(forwardedIP)
-		ipIsPrivate, err := isPrivate(ip)
+	for _, forwardedIP := range strings.Split(ips.xForwardedFor, ",") {
+		ips.ip = strings.TrimSpace(forwardedIP)
+		ipIsPrivate, err := isPrivate(ips.ip)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		if !ipIsPrivate {
-			return ip, nil
+			return ips, nil
 		}
 	}
-	if xRealIP == "" { // latest private xForwardedFor IP
-		return ip, nil
+	if ips.xRealIP == "" { // latest private xForwardedFor IP
+		return ips, nil
 	}
-	return xRealIP, nil
+	return ips, nil
 }
