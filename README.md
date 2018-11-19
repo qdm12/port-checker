@@ -1,6 +1,6 @@
 # Port Checker with Docker
 
-1.89MB container to check a port works with a Golang server
+3MB container to check a TCP port works with a Golang HTTP server
 
 [![Build Status](https://travis-ci.org/qdm12/port-checker.svg?branch=master)](https://travis-ci.org/qdm12/port-checker)
 [![Docker Build Status](https://img.shields.io/docker/build/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
@@ -41,6 +41,12 @@ With a client, access [http://localhost:1234](http://localhost:1234)
 
 You can also port forward with your router to test it is accessible remotely.
 
+## Environment variables
+
+| Environment variable | Default | Description |
+| --- | --- | --- |
+| `PORT` | `8000` | TCP port to listen on internally |
+
 ## More information
 
 Displays the following information (through HTTP):
@@ -52,10 +58,9 @@ Displays the following information (through HTTP):
 
 ## TO DOs
 
-- [ ] Emojis
-- [ ] Precise port to check it can access itself at start
+- [ ] Use GeoLite database and Google Maps to show the location
 - [ ] Add CSS to the HTML template
-- [ ] Use GeoLite database
-- [ ] Add Google Maps to show the location
-- [ ] Unit testing and code refactoring
+- [ ] Precise external mapped port to check it can access itself at start
+- [ ] Unit testing
 - [ ] Notifications (Pushbullet, email, etc. ?)
+- [ ] UDP port check, see [this](https://ops.tips/blog/udp-client-and-server-in-go/)
