@@ -1,6 +1,10 @@
 # Port Checker with Docker
 
-3MB container to check a TCP port works with a Golang HTTP server
+*3MB container to check a TCP port works with a Golang HTTP server*
+
+<a href="https://github.com/qdm12/port-checker">
+  <img src="title.svg" width="100%" height="144">
+</a>
 
 [![Build Status](https://travis-ci.org/qdm12/port-checker.svg?branch=master)](https://travis-ci.org/qdm12/port-checker)
 [![Docker Build Status](https://img.shields.io/docker/build/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
