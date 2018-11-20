@@ -3,7 +3,7 @@
 *3MB container to check a TCP port works with a Golang HTTP server*
 
 <a href="https://github.com/qdm12/port-checker">
-  <img src="title.svg" width="100%" height="144">
+  <img src="title.svg" width="100%" height="15%">
 </a>
 
 [![Build Status](https://travis-ci.org/qdm12/port-checker.svg?branch=master)](https://travis-ci.org/qdm12/port-checker)
