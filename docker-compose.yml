@@ -6,8 +6,10 @@ services:
     container_name: port-checker
     restart: always
     #network_mode: host
-    #environment:
-    #  - PORT=1234
+    environment:
+      - LOGGING=human
+      - NODEID=0
+      - PORT=8000
     network_mode: bridge
     ports:
       - 8000:8000/tcp

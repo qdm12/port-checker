@@ -1,12 +1,20 @@
-ARG ALPINE_VERSION=3.8
-ARG GO_VERSION=1.11.2
+ARG ALPINE_VERSION=3.9
+ARG GO_VERSION=1.12.4
 
 FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+ARG BINCOMPRESS
 RUN apk --update add git build-base upx
 RUN go get -u -v golang.org/x/vgo
 WORKDIR /tmp/gobuild
-    
-FROM scratch AS final
+COPY go.mod go.sum ./
+RUN go mod download
+COPY main.go ./
+COPY pkg ./pkg
+# RUN go test -v
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-s -w" -o app .
+RUN [ "${BINCOMPRESS}" == "" ] || (upx -v --best --ultra-brute --overlay=strip app && upx -t app)
+
+FROM scratch
 LABEL org.label-schema.schema-version="1.0.0-rc1" \
       maintainer="quentin.mcgaw@gmail.com" \
       org.label-schema.build-date=$BUILD_DATE \
@@ -19,29 +27,12 @@ LABEL org.label-schema.schema-version="1.0.0-rc1" \
       org.label-schema.docker.cmd.devel="docker run -it --rm -p 8000:8000/tcp qmcgaw/port-checker" \
       org.label-schema.docker.params="PORT=1 to 65535 internal listening port" \
       org.label-schema.version="" \
-      image-size="3.23MB" \
+      image-size="2.75MB" \
       ram-usage="8MB" \
       cpu-usage="Very low"
 EXPOSE 8000
-HEALTHCHECK --interval=300s --timeout=5s --start-period=5s --retries=1 CMD ["/healthcheck/app"]
+ENTRYPOINT ["/port-checker"]
+HEALTHCHECK --interval=300s --timeout=5s --start-period=5s --retries=1 CMD ["/port-checker", "healthcheck"]
 USER 1000
-ENTRYPOINT ["/portchecker/app"]
-
-FROM builder AS builder-healthcheck
-COPY healthcheck/*.go ./
-RUN go test -v
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-s -w" -o app .
-RUN upx -v --best --ultra-brute --overlay=strip app && upx -t app
-
-FROM builder AS builder-portchecker
-COPY portchecker/go.mod portchecker/go.sum ./
-RUN go mod download
-COPY portchecker/*.go ./
-RUN go test -v
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-s -w" -o app .
-RUN upx -v --best --ultra-brute --overlay=strip app && upx -t app
-
-FROM final
-COPY --from=builder-healthcheck /tmp/gobuild/app /healthcheck/app
-COPY --from=builder-portchecker /tmp/gobuild/app /portchecker/app
-COPY portchecker/index.html /portchecker/index.html
+COPY index.html /index.html
+COPY --from=builder --chown=1000 /tmp/gobuild/app /port-checker
