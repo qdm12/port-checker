@@ -15,6 +15,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflag
 RUN [ "${BINCOMPRESS}" == "" ] || (upx -v --best --ultra-brute --overlay=strip app && upx -t app)
 
 FROM scratch
+ARG BUILD_DATE
+ARG VCS_REF
 LABEL org.label-schema.schema-version="1.0.0-rc1" \
       maintainer="quentin.mcgaw@gmail.com" \
       org.label-schema.build-date=$BUILD_DATE \
@@ -32,7 +34,7 @@ LABEL org.label-schema.schema-version="1.0.0-rc1" \
       cpu-usage="Very low"
 EXPOSE 8000
 ENTRYPOINT ["/port-checker"]
-HEALTHCHECK --interval=300s --timeout=5s --start-period=5s --retries=1 CMD ["/port-checker", "healthcheck"]
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/port-checker","healthcheck"]
 USER 1000
 COPY index.html /index.html
 COPY --from=builder --chown=1000 /tmp/gobuild/app /port-checker
