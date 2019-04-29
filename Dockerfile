@@ -12,7 +12,7 @@ COPY main.go ./
 COPY pkg ./pkg
 # RUN go test -v
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-s -w" -o app .
-RUN [ "${BINCOMPRESS}" == "" ] || (upx -v --best --ultra-brute --overlay=strip app && upx -t app)
+RUN [ "${BINCOMPRESS}" == "" ] || (upx -v --lzma --overlay=strip app && upx -t app)
 
 FROM scratch
 ARG BUILD_DATE
