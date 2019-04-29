@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"port-checker/pkg/logging"
 
@@ -37,6 +38,16 @@ func GetListeningPort() (listeningPort string) {
 	return listeningPort
 }
 
+// GetRootURL obtains and checks the root URL from Viper (env variable or config file, etc.)
+func GetRootURL() string {
+	rootURL := viper.GetString("rooturl")
+	if strings.ContainsAny(rootURL, " .?~#") {
+		logging.Fatal("root URL %s contains invalid characters", rootURL)
+	}
+	rootURL = strings.ReplaceAll(rootURL, "//", "/")
+	return strings.TrimSuffix(rootURL, "/") // already have / from paths of router
+}
+
 // GetDir obtains the executable directory
 func GetDir() (dir string) {
 	ex, err := os.Executable()
@@ -53,6 +64,8 @@ func GetLoggerMode() logging.Mode {
 		return logging.JSON
 	} else if kind == "human" {
 		return logging.Human
+	} else if len(kind) > 0 {
+		logging.Warn("Logging mode %s is unknown", kind)
 	}
 	return logging.Default
 }

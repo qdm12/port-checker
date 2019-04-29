@@ -49,6 +49,7 @@ You can also port forward with your router to test it is accessible remotely.
 | `LOGGING` | `json` | `json`, `human` | Logging format |
 | `NODEID` | `0` | Any integer | Instance ID for distributed systems |
 | `PORT` | `8000` | `1025` to `65535` | TCP port to listen on internally |
+| `ROOTURL` | `/` | URL path string | Used if it is running behind a proxy for example |
 
 ## More information
 
@@ -58,20 +59,6 @@ Displays the following information (through HTTP):
 - Browser and version
 - Device type
 - OS and version
-
-### Building the image
-
-Normally:
-
-```sh
-docker build -t qmcgaw/port-checker .
-```
-
-With binary compression (slow):
-
-```sh
-docker build -t qmcgaw/port-checker --build-arg BINCOMPRESS=1 .
-```
 
 ## TO DOs
 

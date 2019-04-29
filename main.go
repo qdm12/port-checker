@@ -13,6 +13,9 @@ import (
 )
 
 func main() {
+	if healthcheck.Mode() {
+		healthcheck.Query()
+	}
 	fmt.Println("#################################")
 	fmt.Println("######### Port Checker ##########")
 	fmt.Println("######## by Quentin McGaw #######")
@@ -25,10 +28,10 @@ func main() {
 	nodeID := params.GetNodeID()
 	logging.SetGlobalLoggerNodeID(nodeID)
 	listeningPort := params.GetListeningPort()
+	rootURL := params.GetRootURL()
 	dir := params.GetDir()
-	go healthcheck.Serve()
-	router := server.CreateRouter(dir)
-	logging.Info("Public server listening on 0.0.0.0:%s", listeningPort)
+	router := server.CreateRouter(rootURL, dir)
+	logging.Info("Server listening on 0.0.0.0:%s%s", listeningPort, rootURL)
 	err := http.ListenAndServe("0.0.0.0:"+listeningPort, router)
 	if err != nil {
 		logging.Fatal("%s", err)

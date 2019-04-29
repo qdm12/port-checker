@@ -46,46 +46,111 @@ func ipIsPrivate(ip string) (bool, error) {
 	return false, nil
 }
 
-// IPHeaders contains all the IP related headers of an HTTP request
+func checkIP(ip string) error {
+	netIP := net.ParseIP(ip)
+	if netIP == nil {
+		return fmt.Errorf("address %s is not valid", ip)
+	}
+	return nil
+}
+
+// IPHeaders contains all the raw IP headers of an HTTP request
 type IPHeaders struct {
-	IP            string
+	RemoteAddress string
 	XRealIP       string
 	XForwardedFor string
-	RemoteAddress string
 }
 
-func (ips *IPHeaders) String() string {
-	return fmt.Sprintf("%s (XRealIP=%s | XForwardedFor=%s | RemoteAddress=%s)", ips.IP, ips.XRealIP, ips.XForwardedFor, ips.RemoteAddress)
+func (headers *IPHeaders) String() string {
+	return fmt.Sprintf("remoteAddr=%s | xRealIP=%s | xForwardedFor=%s",
+		headers.RemoteAddress, headers.XRealIP, headers.XForwardedFor)
 }
 
-// GetClientIP returns all the IP addresses found in a HTTP request
-func GetClientIP(r *http.Request) (ips IPHeaders, err error) {
-	ips.XRealIP = r.Header.Get("X-Real-Ip")
-	ips.XForwardedFor = r.Header.Get("X-Forwarded-For")
-	ips.RemoteAddress = r.RemoteAddr
-	if ips.XRealIP == "" && ips.XForwardedFor == "" {
-		ips.IP = ips.RemoteAddress
-		if strings.ContainsRune(ips.IP, ':') {
-			ips.IP, _, err = net.SplitHostPort(ips.IP)
-			if err != nil {
-				return ips, err
-			}
+func getRemoteIP(remoteAddr string) (ip string, err error) {
+	ip = remoteAddr
+	if strings.ContainsRune(ip, ':') {
+		ip, _, err = net.SplitHostPort(ip)
+		if err != nil {
+			return "", err
 		}
-		return ips, nil
 	}
-	for _, forwardedIP := range strings.Split(ips.XForwardedFor, ",") {
-		ips.IP = strings.TrimSpace(forwardedIP)
-		private, err := ipIsPrivate(ips.IP)
+	return ip, nil
+}
+
+func extractPublicIPs(ips []string) (publicIPs []string) {
+	for _, ip := range ips {
+		ip = strings.TrimSpace(ip)
+		private, err := ipIsPrivate(ip)
 		if err != nil {
 			logging.Warn("%s", err)
 			continue
 		}
 		if !private {
-			return ips, nil
+			publicIPs = append(publicIPs, ip)
 		}
 	}
-	if ips.XRealIP == "" { // latest private XForwardedFor IP
-		return ips, nil
+	return publicIPs
+}
+
+func getXForwardedIPs(XForwardedFor string) (ips []string) {
+	if len(XForwardedFor) == 0 {
+		return nil
 	}
-	return ips, nil
+	XForwardForIPs := strings.Split(XForwardedFor, ", ")
+	if len(XForwardForIPs) == 1 {
+		// In case it did not work, split with separator `,`
+		XForwardForIPs = strings.Split(XForwardedFor, ",")
+	}
+	for _, ip := range XForwardForIPs {
+		ip = strings.ReplaceAll(ip, " ", "")
+		err := checkIP(ip)
+		if err != nil {
+			logging.Warn("%s", err)
+			continue
+		}
+		ips = append(ips, ip)
+	}
+	return ips
+}
+
+// GetClientIPHeaders returns the IP related HTTP headers from a request
+func GetClientIPHeaders(r *http.Request) (headers IPHeaders) {
+	headers.RemoteAddress = strings.ReplaceAll(r.RemoteAddr, " ", "")
+	headers.XRealIP = strings.ReplaceAll(r.Header.Get("X-Real-Ip"), " ", "")
+	headers.XForwardedFor = strings.ReplaceAll(r.Header.Get("X-Forwarded-For"), " ", "")
+	return headers
+}
+
+// GetClientIP returns one single client IP address
+func GetClientIP(r *http.Request) (ip string, err error) {
+	headers := GetClientIPHeaders(r)
+	// Extract relevant IP data from headers
+	remoteIP, err := getRemoteIP(headers.RemoteAddress)
+	if err != nil {
+		return "", err
+	}
+	// No headers so it can only be RemoteAddress
+	if headers.XRealIP == "" && headers.XForwardedFor == "" {
+		return remoteIP, nil
+	}
+	// 3. RemoteAddress is the proxy server forwarding the IP so
+	// we look into the HTTP headers to get the client IP
+	xForwardedIPs := getXForwardedIPs(headers.XForwardedFor)
+	// TODO check number of ips to match number of proxies setup
+	publicXForwardedIPs := extractPublicIPs(xForwardedIPs)
+	if len(publicXForwardedIPs) > 0 {
+		// first XForwardedIP should be the client IP
+		return publicXForwardedIPs[0], nil
+	}
+	if headers.XRealIP != "" {
+		err := checkIP(headers.XRealIP)
+		if err == nil {
+			return headers.XRealIP, nil
+		}
+	}
+	// latest private XForwardedFor IP
+	if len(xForwardedIPs) > 0 {
+		return xForwardedIPs[len(xForwardedIPs)-1], nil
+	}
+	return remoteIP, nil
 }
