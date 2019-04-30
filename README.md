@@ -6,7 +6,6 @@
   <img src="title.svg" width="300px" height="200px">
 </a>
 
-[![Build Status](https://travis-ci.org/qdm12/port-checker.svg?branch=master)](https://travis-ci.org/qdm12/port-checker)
 [![Docker Build Status](https://img.shields.io/docker/build/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/qdm12/port-checker.svg)](https://github.com/qdm12/port-checker/issues)
