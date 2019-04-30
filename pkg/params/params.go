@@ -59,15 +59,14 @@ func GetDir() (dir string) {
 
 // GetLoggerMode obtains the logging mode from Viper (env variable or config file, etc.)
 func GetLoggerMode() logging.Mode {
-	kind := viper.GetString("logging")
-	if kind == "json" {
-		return logging.JSON
-	} else if kind == "human" {
-		return logging.Human
-	} else if len(kind) > 0 {
-		logging.Warn("Logging mode %s is unknown", kind)
-	}
-	return logging.Default
+	s := viper.GetString("logging")
+	return logging.ParseMode(s)
+}
+
+// GetLoggerLevel obtains the logging level from Viper (env variable or config file, etc.)
+func GetLoggerLevel() logging.Level {
+	s := viper.GetString("loglevel")
+	return logging.ParseLevel(s)
 }
 
 // GetNodeID obtains the node instance ID from Viper (env variable or config file, etc.)
