@@ -1,8 +1,10 @@
-ARG ALPINE_VERSION=3.9
+ARG BASE_IMAGE_BUILDER=golang
 ARG ALPINE_VERSION=3.10
 ARG GO_VERSION=1.12.6
 
-FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+FROM ${BASE_IMAGE_BUILDER}:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+ARG GOARCH=amd64
+ARG GOARM
 ARG BINCOMPRESS
 RUN apk --update add git build-base upx
 RUN go get -u -v golang.org/x/vgo
@@ -11,8 +13,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY main.go ./
 COPY pkg ./pkg
-# RUN go test -v
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-s -w" -o app .
+# RUN go test -v -race ./...
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} GOARM=${GOARM} go build -a -installsuffix cgo -ldflags="-s -w" -o app .
 RUN [ "${BINCOMPRESS}" == "" ] || (upx -v --lzma --overlay=strip app && upx -t app)
 
 FROM scratch

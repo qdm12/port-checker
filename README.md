@@ -25,20 +25,52 @@
 
 ## Setup
 
-To test port 1234, use:
+1. <details><summary>CLICK IF YOU HAVE AN ARM DEVICE</summary><p>
 
-```bash
-docker run -d -p 1234:8000/tcp qmcgaw/port-checker
-```
+    - If you have a ARM 32 bit v6 architecture
 
-or use [docker-compose.yml](https://github.com/qdm12/port-checker/blob/master/docker-compose.yml) with:
+        ```sh
+        docker build -t qmcgaw/port-checker \
+        --build-arg BASE_IMAGE_BUILDER=arm32v6/golang \
+        --build-arg GOARCH=arm \
+        --build-arg GOARM=6 \
+        https://github.com/qdm12/port-checker.git
+        ```
 
-```bash
-docker-compose up -d
-```
+    - If you have a ARM 32 bit v7 architecture
 
-With a client, access [http://localhost:1234](http://localhost:1234)
+        ```sh
+        docker build -t qmcgaw/port-checker \
+        --build-arg BASE_IMAGE_BUILDER=arm32v7/golang \
+        --build-arg GOARCH=arm \
+        --build-arg GOARM=7 \
+        https://github.com/qdm12/port-checker.git
+        ```
 
+    - If you have a ARM 64 bit v8 architecture
+
+        ```sh
+        docker build -t qmcgaw/port-checker \
+        --build-arg BASE_IMAGE_BUILDER=arm64v8/golang \
+        --build-arg GOARCH=arm64 \
+        https://github.com/qdm12/port-checker.git
+        ```
+
+    </p></details>
+
+1. To test port 1234, use:
+
+    ```bash
+    docker run -d -p 1234:8000/tcp qmcgaw/port-checker
+    ```
+
+    or use [docker-compose.yml](https://github.com/qdm12/port-checker/blob/master/docker-compose.yml) with:
+
+    ```bash
+    docker-compose up -d
+    ```
+
+1. With a client, access [http://localhost:1234](http://localhost:1234).
 You can also port forward with your router to test it is accessible remotely.
 
 ## Environment variables
