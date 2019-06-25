@@ -21,7 +21,7 @@
 
 | Image size | RAM usage | CPU usage |
 | --- | --- | --- |
-| 2.75MB | 8MB | Very low |
+| 2.76MB | 8MB | Very low |
 
 ## Setup
 
