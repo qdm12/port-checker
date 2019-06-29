@@ -39,5 +39,5 @@ EXPOSE 8000
 ENTRYPOINT ["/port-checker"]
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/port-checker","healthcheck"]
 USER 1000
-COPY index.html /index.html
+COPY --chown=1000 index.html /index.html
 COPY --from=builder --chown=1000 /tmp/gobuild/app /port-checker
