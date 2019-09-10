@@ -1,0 +1,26 @@
+{
+    "name": "port-checker Dev",
+    "dockerFile": "Dockerfile",
+    "appPort": 8000,
+    "extensions": [
+        "ms-vscode.go",
+        "softwaredotcom.swdc-vscode",
+        "davidanson.vscode-markdownlint",
+        "shardulm94.trailing-spaces",
+        "IBM.output-colorizer"
+    ],
+    "settings": {
+        "go.gopath": "/go",
+        "go.inferGopath": false,
+        "go.useLanguageServer": true
+    },
+    "postCreateCommand": "go mod download",
+    "runArgs": [
+        // Comment out the next line to run as root instead.
+        "-u",
+        "vscode",
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ]
+}
