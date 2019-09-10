@@ -5,11 +5,11 @@ import (
 )
 
 func init() {
-	viper.SetDefault("listeningport", "8000")
+	viper.SetDefault("port", "8000")
 	viper.SetDefault("logmode", "")
 	viper.SetDefault("loglevel", "")
 	viper.SetDefault("nodeid", "0")
-	viper.BindEnv("listeningport")
+	viper.BindEnv("port")
 	viper.BindEnv("logmode")
 	viper.BindEnv("loglevel")
 	viper.BindEnv("nodeid")

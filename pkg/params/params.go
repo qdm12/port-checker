@@ -13,7 +13,7 @@ import (
 
 // GetListeningPort obtains and checks the listening port from Viper (env variable or config file, etc.)
 func GetListeningPort() (listeningPort string) {
-	listeningPort = viper.GetString("listeningPort")
+	listeningPort = viper.GetString("port")
 	value, err := strconv.Atoi(listeningPort)
 	if err != nil {
 		logging.Fatal("listening port %s is not a valid integer", listeningPort)

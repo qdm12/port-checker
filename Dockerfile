@@ -37,6 +37,10 @@ LABEL org.label-schema.schema-version="1.0.0-rc1" \
     cpu-usage="Very low"
 EXPOSE 8000
 ENTRYPOINT ["/port-checker"]
+ENV PORT=8000 \
+    LOGGING=json \
+    NODEID=0 \
+    ROOTURL=/
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/port-checker","healthcheck"]
 USER 1000
 COPY --chown=1000 index.html /index.html
