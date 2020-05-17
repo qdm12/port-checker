@@ -1,62 +1,32 @@
 # Port Checker with Docker
 
-*3MB container to check a TCP port works with a Golang HTTP server*
+*12.8MB container to check a TCP port works with a Golang HTTP server*
 
 <a href="https://github.com/qdm12/port-checker">
   <img src="title.svg" width="300px" height="200px">
 </a>
 
-[![Docker Build Status](https://img.shields.io/docker/build/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
+[![Build status](https://github.com/qdm12/port-checker/workflows/Buildx%20latest/badge.svg)](https://github.com/qdm12/port-checker/actions?query=workflow%3A%22Buildx+latest%22)
+[![Docker Pulls](https://img.shields.io/docker/pulls/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
+[![Docker Stars](https://img.shields.io/docker/stars/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
+[![Image size](https://images.microbadger.com/badges/image/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
+[![Image version](https://images.microbadger.com/badges/version/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
 
+[![Join Slack channel](https://img.shields.io/badge/slack-@qdm12-yellow.svg?logo=slack)](https://join.slack.com/t/qdm12/shared_invite/enQtOTE0NjcxNTM1ODc5LTYyZmVlOTM3MGI4ZWU0YmJkMjUxNmQ4ODQ2OTAwYzMxMTlhY2Q1MWQyOWUyNjc2ODliNjFjMDUxNWNmNzk5MDk)
 [![GitHub last commit](https://img.shields.io/github/last-commit/qdm12/port-checker.svg)](https://github.com/qdm12/port-checker/issues)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/y/qdm12/port-checker.svg)](https://github.com/qdm12/port-checker/issues)
 [![GitHub issues](https://img.shields.io/github/issues/qdm12/port-checker.svg)](https://github.com/qdm12/port-checker/issues)
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
-[![Docker Stars](https://img.shields.io/docker/stars/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
-[![Docker Automated](https://img.shields.io/docker/automated/qmcgaw/port-checker.svg)](https://hub.docker.com/r/qmcgaw/port-checker)
+## Features
 
-[![Image size](https://images.microbadger.com/badges/image/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
-[![Image version](https://images.microbadger.com/badges/version/qmcgaw/port-checker.svg)](https://microbadger.com/images/qmcgaw/port-checker)
-
-| Image size | RAM usage | CPU usage |
-| --- | --- | --- |
-| 2.76MB | 8MB | Very low |
+- HTTP lightweight server responding with information on your client:
+  - Client IP (public or private)
+  - Browser and version
+  - Device type
+  - OS and version
+- Compatible with amd64, 386, armv6, armv7 and arm64 v8 cpu architectures
 
 ## Setup
-
-1. <details><summary>CLICK IF YOU HAVE AN ARM DEVICE</summary><p>
-
-    - If you have a ARM 32 bit v6 architecture
-
-        ```sh
-        docker build -t qmcgaw/port-checker \
-        --build-arg BASE_IMAGE_BUILDER=arm32v6/golang \
-        --build-arg GOARCH=arm \
-        --build-arg GOARM=6 \
-        https://github.com/qdm12/port-checker.git
-        ```
-
-    - If you have a ARM 32 bit v7 architecture
-
-        ```sh
-        docker build -t qmcgaw/port-checker \
-        --build-arg BASE_IMAGE_BUILDER=arm32v7/golang \
-        --build-arg GOARCH=arm \
-        --build-arg GOARM=7 \
-        https://github.com/qdm12/port-checker.git
-        ```
-
-    - If you have a ARM 64 bit v8 architecture
-
-        ```sh
-        docker build -t qmcgaw/port-checker \
-        --build-arg BASE_IMAGE_BUILDER=arm64v8/golang \
-        --build-arg GOARCH=arm64 \
-        https://github.com/qdm12/port-checker.git
-        ```
-
-    </p></details>
 
 1. To test port 1234, use:
 
@@ -77,19 +47,8 @@ You can also port forward with your router to test it is accessible remotely.
 
 | Environment variable | Default | Possible values | Description |
 | --- | --- | --- | --- |
-| `LOGGING` | `json` | `json`, `human` | Logging format |
-| `NODEID` | `0` | Any integer | Instance ID for distributed systems |
 | `PORT` | `8000` | `1025` to `65535` | TCP port to listen on internally |
 | `ROOTURL` | `/` | URL path string | Used if it is running behind a proxy for example |
-
-## More information
-
-Displays the following information (through HTTP):
-
-- Client IP (public or private)
-- Browser and version
-- Device type
-- OS and version
 
 ## Development
 
