@@ -1,11 +1,5 @@
 {
     "recommendations": [
-        "ms-vscode.Go",
-        "ms-vscode-remote.remote-containers",
-        "bajdzis.vscode-database",
-        "ms-azuretools.vscode-docker",
-        "davidanson.vscode-markdownlint",
-        "shardulm94.trailing-spaces",
-        "IBM.output-colorizer"
+        "ms-vscode-remote.remote-containers"
     ]
 }
