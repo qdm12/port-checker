@@ -36,8 +36,8 @@ COPY --from=alpine --chown=1000 /usr/share/zoneinfo /usr/share/zoneinfo
 EXPOSE 8000
 ENTRYPOINT ["/port-checker"]
 ENV TZ=America/Montreal \
-    PORT=8000 \
-    ROOTURL=/
+    LISTENING_PORT=8000 \
+    ROOT_URL=/
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/port-checker","healthcheck"]
 USER 1000
 COPY --chown=1000 index.html /index.html

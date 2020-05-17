@@ -7,9 +7,8 @@ services:
     restart: always
     #network_mode: host
     environment:
-      - LOGGING=human
-      - NODEID=0
-      - PORT=8000
+      - ROOT_URL=/
+      - LISTENING_PORT=8000
     network_mode: bridge
     ports:
       - 8000:8000/tcp

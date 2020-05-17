@@ -47,8 +47,8 @@ You can also port forward with your router to test it is accessible remotely.
 
 | Environment variable | Default | Possible values | Description |
 | --- | --- | --- | --- |
-| `PORT` | `8000` | `1025` to `65535` | TCP port to listen on internally |
-| `ROOTURL` | `/` | URL path string | Used if it is running behind a proxy for example |
+| `LISTENING_PORT` | `8000` | `1025` to `65535` | TCP port to listen on internally |
+| `ROOT_URL` | `/` | URL path string | Used if it is running behind a proxy for example |
 
 ## Development
 
