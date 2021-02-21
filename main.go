@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
 	"github.com/kyokomi/emoji"
 
 	"port-checker/internal/config"
-	"port-checker/internal/handlers"
+	"port-checker/internal/health"
+	"port-checker/internal/server"
 
-	"github.com/qdm12/golibs/healthcheck"
 	"github.com/qdm12/golibs/logging"
 	"github.com/qdm12/golibs/network"
-	"github.com/qdm12/golibs/server"
 )
 
 func main() {
@@ -25,13 +25,15 @@ func main() {
 }
 
 func _main(ctx context.Context) int {
-	if healthcheck.Mode(os.Args) {
-		if err := healthcheck.Query(); err != nil {
+	if health.IsClientMode(os.Args) {
+		client := health.NewClient()
+		if err := client.Query(ctx); err != nil {
 			fmt.Println(err)
 			return 1
 		}
 		return 0
 	}
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	logger := createLogger(logging.InfoLevel)
@@ -60,16 +62,20 @@ func _main(ctx context.Context) int {
 	dir, err := paramsReader.ExeDir()
 	fatalOnError(err)
 	ipManager := network.NewIPManager(logger)
-	productionHandler := handlers.NewProductionHandler(rootURL, dir, ipManager, logger)
-	healthcheckHandler := handlers.NewHealthcheckHandler()
-	serverErrors := make(chan []error)
-	go func() {
-		logger.Info("Listening on port 0.0.0.0:%s at root URL: %s", listeningPort, rootURL)
-		serverErrors <- server.RunServers(ctx,
-			server.Settings{Name: "production", Addr: "0.0.0.0:" + listeningPort, Handler: productionHandler},
-			server.Settings{Name: "healthcheck", Addr: "127.0.0.1:9999", Handler: healthcheckHandler},
-		)
-	}()
+
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+
+	healthcheckServer := health.NewServer("127.0.0.1:9999",
+		logger.WithPrefix("healthcheck: "), health.MakeIsHealthy())
+	wg.Add(1)
+	go healthcheckServer.Run(ctx, wg)
+
+	server, err := server.New(ctx, "0.0.0.0:"+listeningPort,
+		rootURL, dir, logger, ipManager)
+	fatalOnError(err)
+	wg.Add(1)
+	go server.Run(ctx, wg)
 
 	signalsCh := make(chan os.Signal, 1)
 	signal.Notify(signalsCh,
@@ -78,19 +84,13 @@ func _main(ctx context.Context) int {
 		os.Interrupt,
 	)
 	select {
-	case errors := <-serverErrors:
-		for _, err := range errors {
-			logger.Error(err)
-		}
-		return 1
 	case signal := <-signalsCh:
 		logger.Warn("Caught OS signal %s, shutting down", signal)
 		cancel()
-		return 2
 	case <-ctx.Done():
 		logger.Warn("context canceled, shutting down")
-		return 1
 	}
+	return 1
 }
 
 func createLogger(level logging.Level) logging.Logger {
