@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/kyokomi/emoji"
 
@@ -43,24 +42,28 @@ func _main(ctx context.Context) int {
 	fmt.Println("######## Give some " + emoji.Sprint(":heart:") + "at #########")
 	fmt.Println("# github.com/qdm12/port-checker #")
 	fmt.Print("#################################\n\n")
-	fatalOnError := func(err error) {
-		if err != nil {
-			logger.Error(err)
-			cancel()
-			time.Sleep(100 * time.Millisecond) // wait for operations to terminate
-			os.Exit(1)
-		}
-	}
 	paramsReader := config.NewReader()
 	listeningPort, warning, err := paramsReader.ListeningPort()
 	if len(warning) > 0 {
 		logger.Warn(warning)
 	}
-	fatalOnError(err)
+	if err != nil {
+		logger.Error(err)
+		return 1
+	}
+
 	rootURL, err := paramsReader.RootURL()
-	fatalOnError(err)
+	if err != nil {
+		logger.Error(err)
+		return 1
+	}
+
 	dir, err := paramsReader.ExeDir()
-	fatalOnError(err)
+	if err != nil {
+		logger.Error(err)
+		return 1
+	}
+
 	ipManager := network.NewIPManager(logger)
 
 	wg := &sync.WaitGroup{}
@@ -73,7 +76,10 @@ func _main(ctx context.Context) int {
 
 	server, err := server.New(ctx, "0.0.0.0:"+listeningPort,
 		rootURL, dir, logger, ipManager)
-	fatalOnError(err)
+	if err != nil {
+		logger.Error(err)
+		return 1
+	}
 	wg.Add(1)
 	go server.Run(ctx, wg)
 
