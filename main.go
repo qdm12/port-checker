@@ -10,8 +10,8 @@ import (
 
 	"github.com/kyokomi/emoji"
 
-	"port-checker/pkg/handlers"
-	"port-checker/pkg/params"
+	"port-checker/internal/handlers"
+	"port-checker/internal/params"
 
 	"github.com/qdm12/golibs/healthcheck"
 	"github.com/qdm12/golibs/logging"
