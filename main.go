@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"port-checker/internal/config"
+	"port-checker/internal/health"
+	"port-checker/internal/server"
 	"sync"
 	"syscall"
 
 	"github.com/kyokomi/emoji"
-
-	"port-checker/internal/config"
-	"port-checker/internal/health"
-	"port-checker/internal/server"
-
 	"github.com/qdm12/golibs/logging"
 	"github.com/qdm12/golibs/network"
 )
