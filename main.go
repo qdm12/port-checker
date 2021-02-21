@@ -10,8 +10,8 @@ import (
 
 	"github.com/kyokomi/emoji"
 
+	"port-checker/internal/config"
 	"port-checker/internal/handlers"
-	"port-checker/internal/params"
 
 	"github.com/qdm12/golibs/healthcheck"
 	"github.com/qdm12/golibs/logging"
@@ -49,15 +49,15 @@ func _main(ctx context.Context) int {
 			os.Exit(1)
 		}
 	}
-	paramsReader := params.NewReader()
-	listeningPort, warning, err := paramsReader.GetListeningPort()
+	paramsReader := config.NewReader()
+	listeningPort, warning, err := paramsReader.ListeningPort()
 	if len(warning) > 0 {
 		logger.Warn(warning)
 	}
 	fatalOnError(err)
-	rootURL, err := paramsReader.GetRootURL()
+	rootURL, err := paramsReader.RootURL()
 	fatalOnError(err)
-	dir, err := paramsReader.GetDir()
+	dir, err := paramsReader.ExeDir()
 	fatalOnError(err)
 	ipManager := network.NewIPManager(logger)
 	productionHandler := handlers.NewProductionHandler(rootURL, dir, ipManager, logger)
