@@ -67,6 +67,7 @@ LABEL \
 COPY --from=alpine --chown=1000 /usr/share/zoneinfo /usr/share/zoneinfo
 EXPOSE 8000
 ENTRYPOINT ["/port-checker"]
+CMD ["-healthserver=true"]
 ENV TZ=America/Montreal \
     LISTENING_PORT=8000 \
     ROOT_URL=/

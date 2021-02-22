@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -44,7 +45,7 @@ func main() {
 		os.Exit(1)
 	case signal := <-signalsCh:
 		fmt.Println()
-		logger.Error("Shutting down: signal", signal)
+		logger.Warn("Shutting down: signal", signal)
 	}
 
 	cancel()
@@ -97,6 +98,12 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 		return err
 	}
 
+	flagSet := flag.NewFlagSet(args[0], flag.ExitOnError)
+	healthServer := flagSet.Bool("healthserver", false, "Enable the health HTTP server")
+	if err := flagSet.Parse(args[1:]); err != nil {
+		return err
+	}
+
 	ipManager := clientip.NewExtractor()
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -105,10 +112,12 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 	N := 0
 	crashed := make(chan error)
 
-	healthcheckServer := health.NewServer("127.0.0.1:9999",
-		logger.NewChild(logging.SetPrefix("healthcheck: ")), health.MakeIsHealthy())
-	N++
-	go healthcheckServer.Run(ctx, crashed)
+	if *healthServer {
+		healthcheckServer := health.NewServer("127.0.0.1:9999",
+			logger.NewChild(logging.SetPrefix("healthcheck: ")), health.MakeIsHealthy())
+		N++
+		go healthcheckServer.Run(ctx, crashed)
+	}
 
 	server, err := server.New("0.0.0.0:"+strconv.FormatInt(int64(listeningPort), 10),
 		rootURL, dir, logger, ipManager)
