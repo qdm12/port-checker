@@ -1,9 +1,9 @@
-name: Latest
+name: CI
 
 on:
   push:
     paths:
-      - .github/workflows/build.yml
+      - .github/workflows/docker.yml
       - internal/**
       - .dockerignore
       - .golangci.yml
@@ -13,7 +13,7 @@ on:
       - main.go
   pull_request:
     paths:
-      - .github/workflows/build.yml
+      - .github/workflows/docker.yml
       - internal/**
       - .dockerignore
       - .golangci.yml
