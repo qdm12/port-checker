@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     paths:
-      - .github/workflows/docker.yml
+      - .github/workflows/ci.yml
       - internal/**
       - .dockerignore
       - .golangci.yml
@@ -13,7 +13,7 @@ on:
       - main.go
   pull_request:
     paths:
-      - .github/workflows/docker.yml
+      - .github/workflows/ci.yml
       - internal/**
       - .dockerignore
       - .golangci.yml
