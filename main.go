@@ -100,8 +100,17 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 
 	flagSet := flag.NewFlagSet(args[0], flag.ExitOnError)
 	healthServer := flagSet.Bool("healthserver", false, "Enable the health HTTP server")
+	listeningPortPtr := flagSet.String("port", "", "Listening port for the HTTP server")
 	if err := flagSet.Parse(args[1:]); err != nil {
 		return err
+	}
+
+	if portStr := *listeningPortPtr; len(portStr) > 0 {
+		port, err := strconv.Atoi(portStr)
+		if err != nil {
+			return err
+		}
+		listeningPort = uint16(port)
 	}
 
 	ipManager := clientip.NewExtractor()
