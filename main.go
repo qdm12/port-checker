@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/golibs/logging"
@@ -18,22 +19,60 @@ import (
 
 func main() {
 	ctx := context.Background()
-	os.Exit(_main(ctx))
-}
+	ctx, cancel := context.WithCancel(ctx)
 
-func _main(ctx context.Context) int {
-	if health.IsClientMode(os.Args) {
-		client := health.NewClient()
-		if err := client.Query(ctx); err != nil {
-			fmt.Println(err)
-			return 1
+	logger := logging.New(logging.StdLog)
+
+	errorCh := make(chan error)
+	go func() {
+		errorCh <- _main(ctx, os.Args, logger)
+	}()
+
+	signalsCh := make(chan os.Signal, 1)
+	signal.Notify(signalsCh,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		os.Interrupt,
+	)
+
+	select {
+	case err := <-errorCh:
+		close(errorCh)
+		if err == nil { // expected exit such as healthcheck
+			os.Exit(0)
 		}
-		return 0
+		logger.Warn("Fatal error:", err)
+		os.Exit(1)
+	case signal := <-signalsCh:
+		fmt.Println()
+		logger.Error("Shutting down: signal", signal)
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	logger := logging.New(logging.StdLog)
+	cancel()
+
+	const shutdownGracePeriod = time.Second
+	timer := time.NewTimer(shutdownGracePeriod)
+	select {
+	case <-errorCh:
+		if !timer.Stop() {
+			<-timer.C
+		}
+	case <-timer.C:
+		logger.Warn("Shutdown timed out")
+	}
+
+	os.Exit(1)
+}
+
+func _main(ctx context.Context, args []string, logger logging.Logger) error {
+	if health.IsClientMode(args) {
+		client := health.NewClient()
+		if err := client.Query(ctx); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	fmt.Println("#################################")
 	fmt.Println("######### Port Checker ##########")
 	fmt.Println("######## by Quentin McGaw #######")
@@ -46,20 +85,17 @@ func _main(ctx context.Context) int {
 		logger.Warn(warning)
 	}
 	if err != nil {
-		logger.Error(err)
-		return 1
+		return err
 	}
 
 	rootURL, err := paramsReader.RootURL()
 	if err != nil {
-		logger.Error(err)
-		return 1
+		return err
 	}
 
 	dir, err := paramsReader.ExeDir()
 	if err != nil {
-		logger.Error(err)
-		return 1
+		return err
 	}
 
 	ipManager := clientip.NewExtractor()
@@ -75,24 +111,10 @@ func _main(ctx context.Context) int {
 	server, err := server.New(ctx, "0.0.0.0:"+strconv.FormatInt(int64(listeningPort), 10),
 		rootURL, dir, logger, ipManager)
 	if err != nil {
-		logger.Error(err)
-		return 1
+		return err
 	}
 	wg.Add(1)
-	go server.Run(ctx, wg)
+	server.Run(ctx, wg)
 
-	signalsCh := make(chan os.Signal, 1)
-	signal.Notify(signalsCh,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		os.Interrupt,
-	)
-	select {
-	case signal := <-signalsCh:
-		logger.Warn("Caught OS signal %s, shutting down", signal)
-		cancel()
-	case <-ctx.Done():
-		logger.Warn("context canceled, shutting down")
-	}
-	return 1
+	return nil
 }
