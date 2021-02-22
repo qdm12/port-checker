@@ -9,7 +9,6 @@ import (
 	"port-checker/internal/health"
 	"port-checker/internal/server"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
@@ -100,21 +99,31 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 
 	ipManager := clientip.NewExtractor()
 
-	wg := &sync.WaitGroup{}
-	defer wg.Wait()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	N := 0
+	crashed := make(chan error)
 
 	healthcheckServer := health.NewServer("127.0.0.1:9999",
 		logger.NewChild(logging.SetPrefix("healthcheck: ")), health.MakeIsHealthy())
-	wg.Add(1)
-	go healthcheckServer.Run(ctx, wg)
+	N++
+	go healthcheckServer.Run(ctx, crashed)
 
-	server, err := server.New(ctx, "0.0.0.0:"+strconv.FormatInt(int64(listeningPort), 10),
+	server, err := server.New("0.0.0.0:"+strconv.FormatInt(int64(listeningPort), 10),
 		rootURL, dir, logger, ipManager)
 	if err != nil {
 		return err
 	}
-	wg.Add(1)
-	server.Run(ctx, wg)
+	N++
+	go server.Run(ctx, crashed)
 
-	return nil
+	err = <-crashed
+	cancel()
+
+	for i := 1; i < N; i++ {
+		<-crashed
+	}
+
+	return err
 }

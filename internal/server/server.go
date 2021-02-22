@@ -4,7 +4,6 @@ package server
 import (
 	"context"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/qdm12/golibs/clientip"
@@ -12,7 +11,7 @@ import (
 )
 
 type Server interface {
-	Run(ctx context.Context, wg *sync.WaitGroup)
+	Run(ctx context.Context, crashed chan<- error)
 }
 
 type server struct {
@@ -21,7 +20,7 @@ type server struct {
 	handler http.Handler
 }
 
-func New(ctx context.Context, address, rootURL, uiDir string,
+func New(address, rootURL, uiDir string,
 	logger logging.Logger, ipManager clientip.Extractor) (s Server, err error) {
 	handler, err := newHandler(rootURL, uiDir, logger, ipManager)
 	if err != nil {
@@ -34,8 +33,7 @@ func New(ctx context.Context, address, rootURL, uiDir string,
 	}, nil
 }
 
-func (s *server) Run(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (s *server) Run(ctx context.Context, crashed chan<- error) {
 	server := http.Server{Addr: s.address, Handler: s.handler}
 	go func() {
 		<-ctx.Done()
@@ -48,12 +46,7 @@ func (s *server) Run(ctx context.Context, wg *sync.WaitGroup) {
 			s.logger.Error("failed shutting down: %s", err)
 		}
 	}()
-	for ctx.Err() == nil {
-		s.logger.Info("listening on %s", s.address)
-		err := server.ListenAndServe()
-		if err != nil && ctx.Err() == nil { // server crashed
-			s.logger.Error(err)
-			s.logger.Info("restarting")
-		}
-	}
+
+	s.logger.Info("listening on %s", s.address)
+	crashed <- server.ListenAndServe()
 }
