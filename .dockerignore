@@ -1,6 +1,12 @@
-.gitignore
-.travis.yml
+.devcontainer/
 .git/
+.github/
+.dockerignore
+.gitignore
+docker-compose.yml
+Dockerfile
+LICENSE
 README.md
+title.svg
 port-checker
 port-checker.exe
