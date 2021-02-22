@@ -25,7 +25,7 @@ type handlers struct {
 
 func newHandler(rootURL, uiDir string, logger logging.Logger,
 	ipManager network.IPManager) (h http.Handler, err error) {
-	indexTemplate, err := parseTemplate(uiDir)
+	indexTemplate, err := parseIndexTemplate(uiDir)
 	if err != nil {
 		return nil, err
 	}

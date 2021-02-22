@@ -1,21 +1,30 @@
 package server
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"text/template"
 )
 
-func parseTemplate(uiDir string) (template *template.Template, err error) {
+func parseIndexTemplate(uiDir string) (indexTemplate *template.Template, err error) {
 	templateFilepath := filepath.Join(uiDir, "index.html")
 
 	file, err := os.Open(templateFilepath)
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
+
+	b, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := file.Close(); err != nil {
 		return nil, err
 	}
 
-	return template.ParseFiles(templateFilepath)
+	indexTemplate = template.New("index.html")
+	return indexTemplate.Parse(string(b))
 }
