@@ -1,0 +1,34 @@
+before:
+  hooks:
+    - go mod download
+builds:
+  - main: ./main.go
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - 386
+      - arm64
+      - arm
+      - s390x
+      - ppc64le
+      - riscv64
+    goarm:
+      - 6
+      - 7
+archives:
+  - format: binary
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
