@@ -21,6 +21,8 @@ on:
       - go.mod
       - go.sum
       - main.go
+  release:
+    types: [published]
 
 jobs:
   verify:
@@ -51,6 +53,7 @@ jobs:
           -coverprofile=coverage.txt \
           -covermode=atomic \
           ./...
+
       # We run this here to use the caching of the previous steps
       - name: Build final image
         run: docker build .
@@ -61,6 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # for gorelease last step
 
       - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
@@ -103,3 +108,16 @@ jobs:
         name: Microbadger hook
         run: curl -X POST https://hooks.microbadger.com/images/qmcgaw/port-checker/d8zbXT9JDvYGqqm9kx3eUcVCunc=
         continue-on-error: true
+
+      - if: github.event_name == 'release'
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - if: github.event_name == 'release'
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --config .gorelease.yml --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
