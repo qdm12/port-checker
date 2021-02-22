@@ -11,7 +11,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/kyokomi/emoji"
 	"github.com/qdm12/golibs/logging"
 	"github.com/qdm12/golibs/network"
 )
@@ -37,7 +36,7 @@ func _main(ctx context.Context) int {
 	fmt.Println("#################################")
 	fmt.Println("######### Port Checker ##########")
 	fmt.Println("######## by Quentin McGaw #######")
-	fmt.Println("######## Give some " + emoji.Sprint(":heart:") + "at #########")
+	fmt.Println("######## Give some ❤️ at #########")
 	fmt.Println("# github.com/qdm12/port-checker #")
 	fmt.Print("#################################\n\n")
 	paramsReader := config.NewReader()
