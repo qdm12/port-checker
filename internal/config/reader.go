@@ -5,29 +5,31 @@ import (
 )
 
 type Reader interface {
-	ListeningPort() (listeningPort, warning string, err error)
+	ListeningPort() (port uint16, warning string, err error)
 	RootURL() (string, error)
 	ExeDir() (dir string, err error)
 }
 
 type reader struct {
-	envParams params.EnvParams
+	env params.Env
+	os  params.OS
 }
 
 func NewReader() Reader {
 	return &reader{
-		envParams: params.NewEnvParams(),
+		env: params.NewEnv(),
+		os:  params.NewOS(),
 	}
 }
 
-func (r *reader) ListeningPort() (listeningPort, warning string, err error) {
-	return r.envParams.GetListeningPort()
+func (r *reader) ListeningPort() (port uint16, warning string, err error) {
+	return r.env.ListeningPort("LISTENING_PORT", params.Default("8000"))
 }
 
 func (r *reader) RootURL() (string, error) {
-	return r.envParams.GetRootURL()
+	return r.env.RootURL("ROOT_URL")
 }
 
 func (r *reader) ExeDir() (dir string, err error) {
-	return r.envParams.GetExeDir()
+	return r.os.ExeDir()
 }

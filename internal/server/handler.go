@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/avct/uasurfer"
+	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/golibs/logging"
-	"github.com/qdm12/golibs/network"
 )
 
 type handlers struct {
@@ -17,14 +17,14 @@ type handlers struct {
 	rootURL string
 	// Objects
 	logger        logging.Logger
-	ipManager     network.IPManager
+	ipManager     clientip.Extractor
 	indexTemplate *template.Template
 	// Mockable functions
 	timeNow func() time.Time
 }
 
 func newHandler(rootURL, uiDir string, logger logging.Logger,
-	ipManager network.IPManager) (h http.Handler, err error) {
+	ipManager clientip.Extractor) (h http.Handler, err error) {
 	indexTemplate, err := parseIndexTemplate(uiDir)
 	if err != nil {
 		return nil, err
@@ -54,16 +54,10 @@ func (h *handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	browser, device, os := getUserAgentDetails(r.Header.Get("User-Agent"))
-	headers := h.ipManager.GetClientIPHeaders(r)
-	ip, err := h.ipManager.GetClientIP(r)
-	if err != nil {
-		h.logger.Warn(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	ip := h.ipManager.HTTPRequest(r)
 
-	h.logger.Info("received request from IP %s (headers: %s) (device: %s | %s | %s)",
-		ip, headers.String(), device, os, browser,
+	h.logger.Info("received request from IP %s (device: %s | %s | %s)",
+		ip, device, os, browser,
 	)
 
 	htmlData := struct {
@@ -72,7 +66,7 @@ func (h *handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Device   string
 		OS       string
 	}{
-		ClientIP: ip,
+		ClientIP: ip.String(),
 		Browser:  browser,
 		Device:   device,
 		OS:       os,

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/golibs/logging"
-	"github.com/qdm12/golibs/network"
 )
 
 type Server interface {
@@ -22,7 +22,7 @@ type server struct {
 }
 
 func New(ctx context.Context, address, rootURL, uiDir string,
-	logger logging.Logger, ipManager network.IPManager) (s Server, err error) {
+	logger logging.Logger, ipManager clientip.Extractor) (s Server, err error) {
 	handler, err := newHandler(rootURL, uiDir, logger, ipManager)
 	if err != nil {
 		return nil, err

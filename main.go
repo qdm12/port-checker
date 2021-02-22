@@ -8,11 +8,12 @@ import (
 	"port-checker/internal/config"
 	"port-checker/internal/health"
 	"port-checker/internal/server"
+	"strconv"
 	"sync"
 	"syscall"
 
+	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/golibs/logging"
-	"github.com/qdm12/golibs/network"
 )
 
 func main() {
@@ -32,7 +33,7 @@ func _main(ctx context.Context) int {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	logger := createLogger(logging.InfoLevel)
+	logger := logging.New(logging.StdLog)
 	fmt.Println("#################################")
 	fmt.Println("######### Port Checker ##########")
 	fmt.Println("######## by Quentin McGaw #######")
@@ -61,17 +62,17 @@ func _main(ctx context.Context) int {
 		return 1
 	}
 
-	ipManager := network.NewIPManager(logger)
+	ipManager := clientip.NewExtractor()
 
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()
 
 	healthcheckServer := health.NewServer("127.0.0.1:9999",
-		logger.WithPrefix("healthcheck: "), health.MakeIsHealthy())
+		logger.NewChild(logging.SetPrefix("healthcheck: ")), health.MakeIsHealthy())
 	wg.Add(1)
 	go healthcheckServer.Run(ctx, wg)
 
-	server, err := server.New(ctx, "0.0.0.0:"+listeningPort,
+	server, err := server.New(ctx, "0.0.0.0:"+strconv.FormatInt(int64(listeningPort), 10),
 		rootURL, dir, logger, ipManager)
 	if err != nil {
 		logger.Error(err)
@@ -94,12 +95,4 @@ func _main(ctx context.Context) int {
 		logger.Warn("context canceled, shutting down")
 	}
 	return 1
-}
-
-func createLogger(level logging.Level) logging.Logger {
-	logger, err := logging.NewLogger(logging.ConsoleEncoding, level, -1)
-	if err != nil {
-		panic(err)
-	}
-	return logger
 }
