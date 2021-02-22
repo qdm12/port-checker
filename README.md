@@ -43,6 +43,18 @@
 1. With a client, access [http://localhost:1234](http://localhost:1234).
 You can also port forward with your router to test it is accessible remotely.
 
+### Binary
+
+You can also download one of the binaries on the Github releases. For example:
+
+```sh
+wget -qO port-checker https://github.com/qdm12/port-checker/releases/download/v0.1.0/port-checker_0.1.0_linux_amd64
+chmod +x port-checker
+./port-checker
+# Usage with
+./port-checker -help
+```
+
 ## Environment variables
 
 | Environment variable | Default | Possible values | Description |
