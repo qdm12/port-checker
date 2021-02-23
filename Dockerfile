@@ -12,6 +12,7 @@ WORKDIR /tmp/gobuild
 # Copy repository code and install Go dependencies
 COPY go.mod go.sum ./
 RUN go mod download
+COPY index.html index.html
 COPY main.go main.go
 COPY internal/ ./internal/
 
@@ -73,5 +74,4 @@ ENV TZ=America/Montreal \
     ROOT_URL=/
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/port-checker","healthcheck"]
 USER 1000
-COPY --chown=1000 index.html /index.html
 COPY --from=build --chown=1000 /tmp/gobuild/app /port-checker

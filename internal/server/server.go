@@ -20,9 +20,9 @@ type server struct {
 	handler http.Handler
 }
 
-func New(address, rootURL, uiDir string,
+func New(address, rootURL, templateStr string,
 	logger logging.Logger, ipManager clientip.Extractor) (s Server, err error) {
-	handler, err := newHandler(rootURL, uiDir, logger, ipManager)
+	handler, err := newHandler(rootURL, templateStr, logger, ipManager)
 	if err != nil {
 		return nil, err
 	}

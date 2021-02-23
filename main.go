@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"flag"
 	"fmt"
 	"os"
@@ -64,6 +65,9 @@ func main() {
 	os.Exit(1)
 }
 
+//go:embed index.html
+var templateStr string //nolint:gochecknoglobals
+
 func _main(ctx context.Context, args []string, logger logging.Logger) error {
 	if health.IsClientMode(args) {
 		client := health.NewClient()
@@ -89,11 +93,6 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 	}
 
 	rootURL, err := paramsReader.RootURL()
-	if err != nil {
-		return err
-	}
-
-	dir, err := paramsReader.ExeDir()
 	if err != nil {
 		return err
 	}
@@ -128,8 +127,8 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 		go healthcheckServer.Run(ctx, crashed)
 	}
 
-	server, err := server.New("0.0.0.0:"+strconv.FormatInt(int64(listeningPort), 10),
-		rootURL, dir, logger, ipManager)
+	address := "0.0.0.0:" + strconv.FormatInt(int64(listeningPort), 10)
+	server, err := server.New(address, rootURL, templateStr, logger, ipManager)
 	if err != nil {
 		return err
 	}

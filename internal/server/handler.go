@@ -23,9 +23,9 @@ type handlers struct {
 	timeNow func() time.Time
 }
 
-func newHandler(rootURL, uiDir string, logger logging.Logger,
+func newHandler(rootURL, templateStr string, logger logging.Logger,
 	ipManager clientip.Extractor) (h http.Handler, err error) {
-	indexTemplate, err := parseIndexTemplate(uiDir)
+	indexTemplate, err := template.New("index.html").Parse(templateStr)
 	if err != nil {
 		return nil, err
 	}
