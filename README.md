@@ -37,7 +37,7 @@
     To test port 1234 internally, use:
 
     ```bash
-    docker run -it --rm -e PORT=1234 qmcgaw/port-checker
+    docker run -it --rm -e LISTENING_PORT=1234 qmcgaw/port-checker
     ```
 
 1. With a client, access [http://localhost:1234](http://localhost:1234).
