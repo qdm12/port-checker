@@ -71,6 +71,7 @@ var templateStr string
 var ErrPortOutOfRange = errors.New("port is out of range")
 
 type Logger interface {
+	Info(message string)
 	Infof(format string, args ...any)
 	Warn(message string)
 	Errorf(format string, args ...any)
@@ -97,14 +98,20 @@ func _main(ctx context.Context, logger Logger) (err error) {
 
 	ipManager := clientip.NewExtractor()
 
-	crashed := make(chan error)
-
 	address := "0.0.0.0:" + strconv.FormatUint(uint64(*settings.ListeningPort), 10)
 	server, err := server.New(address, *settings.RootURL, templateStr, logger, ipManager)
 	if err != nil {
 		return err
 	}
-	go server.Run(ctx, crashed)
+	runError, err := server.Start(ctx)
+	if err != nil {
+		return fmt.Errorf("starting http server: %w", err)
+	}
 
-	return <-crashed
+	select {
+	case err = <-runError:
+		return err
+	case <-ctx.Done():
+		return server.Stop()
+	}
 }
