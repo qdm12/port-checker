@@ -10,7 +10,7 @@ RUN apk --update add tzdata
 
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS base
 ENV CGO_ENABLED=0
-RUN apk --update add git
+RUN apk --update add git g++
 WORKDIR /tmp/gobuild
 COPY --from=xcputranslate /xcputranslate /usr/local/bin/xcputranslate
 # Copy repository code and install Go dependencies
@@ -21,9 +21,10 @@ COPY main.go main.go
 COPY internal/ ./internal/
 
 FROM --platform=${BUILDPLATFORM} base AS test
+# Note on the go race detector:
+# - we set CGO_ENABLED=1 to have it enabled
+# - we installed g++ to support the race detector
 ENV CGO_ENABLED=1
-# g++ is installed for the -race detector in go test
-RUN apk --update add g++
 
 FROM --platform=${BUILDPLATFORM} base AS lint
 ARG GOLANGCI_LINT_VERSION=v1.37.1
