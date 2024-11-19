@@ -72,7 +72,7 @@ var templateStr string
 
 var ErrPortOutOfRange = errors.New("port is out of range")
 
-func _main(ctx context.Context, args []string, logger logging.Logger) error {
+func _main(ctx context.Context, args []string, logger logging.Logger) error { //nolint:cyclop
 	if health.IsClientMode(args) {
 		client := health.NewClient()
 		if err := client.Query(ctx); err != nil {

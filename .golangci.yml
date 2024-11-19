@@ -4,14 +4,32 @@ linters-settings:
 
 linters:
   enable:
+    - asasalint
     - asciicheck
+    - bidichk
     - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
     - copyloopvar
+    - cyclop
+    - decorder
     - dogsled
     - dupl
+    - dupword
+    - durationcheck
+    - err113
+    - errchkjson
+    - errname
+    - errorlint
     - exhaustive
+    - fatcontext
+    - forcetypeassert
+    - gci
+    - gocheckcompilerdirectives
     - gochecknoglobals
     - gochecknoinits
+    - gochecksumtype
     - gocognit
     - goconst
     - gocritic
@@ -20,18 +38,48 @@ linters:
     - gofumpt
     - goheader
     - goimports
+    - gomoddirectives
     - goprintffuncname
     - gosec
+    - gosmopolitan
+    - grouper
+    - importas
+    - inamedparam
+    - interfacebloat
+    - intrange
+    - ireturn
     - lll
+    - maintidx
+    - makezero
+    - mirror
     - misspell
     - mnd
+    - musttag
     - nakedret
     - nestif
+    - nilerr
+    - nilnil
     - noctx
     - nolintlint
+    - nosprintfhostport
+    - paralleltest
+    - perfsprint
     - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - revive
     - rowserrcheck
+    - sloglint
     - sqlclosecheck
+    - tagalign
+    - tenv
+    - thelper
+    - tparallel
     - unconvert
     - unparam
+    - usestdlibvars
+    - wastedassign
     - whitespace
+    - zerologlint

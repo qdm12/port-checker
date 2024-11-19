@@ -10,11 +10,7 @@ import (
 	"github.com/qdm12/golibs/logging"
 )
 
-type Server interface {
-	Run(ctx context.Context, crashed chan<- error)
-}
-
-type server struct {
+type Server struct {
 	address string
 	logger  logging.Logger
 	handler http.Handler
@@ -22,19 +18,19 @@ type server struct {
 
 func New(address, rootURL, templateStr string,
 	logger logging.Logger, ipManager clientip.Extractor,
-) (s Server, err error) {
+) (s *Server, err error) {
 	handler, err := newHandler(rootURL, templateStr, logger, ipManager)
 	if err != nil {
 		return nil, err
 	}
-	return &server{
+	return &Server{
 		address: address,
 		logger:  logger,
 		handler: handler,
 	}, nil
 }
 
-func (s *server) Run(ctx context.Context, crashed chan<- error) {
+func (s *Server) Run(ctx context.Context, crashed chan<- error) {
 	server := http.Server{Addr: s.address, Handler: s.handler, ReadHeaderTimeout: time.Second}
 	go func() {
 		<-ctx.Done()
@@ -43,7 +39,7 @@ func (s *server) Run(ctx context.Context, crashed chan<- error) {
 		const shutdownGraceDuration = 2 * time.Second
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownGraceDuration)
 		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil {
+		if err := server.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
 			s.logger.Error("failed shutting down: %s", err)
 		}
 	}()
