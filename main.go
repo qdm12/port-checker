@@ -3,16 +3,19 @@ package main
 import (
 	"context"
 	_ "embed"
+	"errors"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
-	"port-checker/internal/config"
-	"port-checker/internal/health"
-	"port-checker/internal/server"
 	"strconv"
 	"syscall"
 	"time"
+
+	"port-checker/internal/config"
+	"port-checker/internal/health"
+	"port-checker/internal/server"
 
 	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/golibs/logging"
@@ -66,7 +69,9 @@ func main() {
 }
 
 //go:embed index.html
-var templateStr string //nolint:gochecknoglobals
+var templateStr string
+
+var ErrPortOutOfRange = errors.New("port is out of range")
 
 func _main(ctx context.Context, args []string, logger logging.Logger) error {
 	if health.IsClientMode(args) {
@@ -108,6 +113,9 @@ func _main(ctx context.Context, args []string, logger logging.Logger) error {
 		port, err := strconv.Atoi(portStr)
 		if err != nil {
 			return err
+		}
+		if port < 0 || port > math.MaxUint16 {
+			return fmt.Errorf("%w: %d", ErrPortOutOfRange, port)
 		}
 		listeningPort = uint16(port)
 	}

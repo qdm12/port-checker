@@ -28,7 +28,7 @@ func NewServer(address string, logger logging.Logger, healthcheck func() error) 
 }
 
 func (s *server) Run(ctx context.Context, crashed chan<- error) {
-	server := http.Server{Addr: s.address, Handler: s.handler}
+	server := http.Server{Addr: s.address, Handler: s.handler, ReadHeaderTimeout: time.Second}
 	go func() {
 		<-ctx.Done()
 		s.logger.Warn("shutting down (context canceled)")

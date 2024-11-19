@@ -2,8 +2,10 @@ ARG ALPINE_VERSION=3.20
 ARG GO_VERSION=1.23
 ARG BUILDPLATFORM=linux/amd64
 ARG XCPUTRANSLATE_VERSION=v0.6.0
+ARG GOLANGCI_LINT_VERSION=v1.61.0
 
 FROM --platform=${BUILDPLATFORM} qmcgaw/xcputranslate:${XCPUTRANSLATE_VERSION} AS xcputranslate
+FROM --platform=${BUILDPLATFORM} qmcgaw/binpot:golangci-lint-${GOLANGCI_LINT_VERSION} AS golangci-lint
 
 FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS alpine
 RUN apk --update add tzdata
@@ -13,6 +15,7 @@ ENV CGO_ENABLED=0
 RUN apk --update add git g++
 WORKDIR /tmp/gobuild
 COPY --from=xcputranslate /xcputranslate /usr/local/bin/xcputranslate
+COPY --from=golangci-lint /bin /go/bin/golangci-lint
 # Copy repository code and install Go dependencies
 COPY go.mod go.sum ./
 RUN go mod download
@@ -27,10 +30,7 @@ FROM --platform=${BUILDPLATFORM} base AS test
 ENV CGO_ENABLED=1
 ENTRYPOINT go test -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
 
-FROM --platform=${BUILDPLATFORM} base AS lint
-ARG GOLANGCI_LINT_VERSION=v1.37.1
-RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-    sh -s -- -b /usr/local/bin ${GOLANGCI_LINT_VERSION}
+FROM --platform=$BUILDPLATFORM base AS lint
 COPY .golangci.yml ./
 RUN golangci-lint run --timeout=10m
 
@@ -63,7 +63,7 @@ LABEL \
     org.opencontainers.image.title="port-checker" \
     org.opencontainers.image.description="3MB container to check a port works with a Golang server"
 COPY --from=alpine --chown=1000 /usr/share/zoneinfo /usr/share/zoneinfo
-EXPOSE 8000
+EXPOSE 8000/tcp
 ENTRYPOINT ["/port-checker"]
 CMD ["-healthserver=true"]
 ENV TZ=America/Montreal \

@@ -21,7 +21,8 @@ type server struct {
 }
 
 func New(address, rootURL, templateStr string,
-	logger logging.Logger, ipManager clientip.Extractor) (s Server, err error) {
+	logger logging.Logger, ipManager clientip.Extractor,
+) (s Server, err error) {
 	handler, err := newHandler(rootURL, templateStr, logger, ipManager)
 	if err != nil {
 		return nil, err
@@ -34,7 +35,7 @@ func New(address, rootURL, templateStr string,
 }
 
 func (s *server) Run(ctx context.Context, crashed chan<- error) {
-	server := http.Server{Addr: s.address, Handler: s.handler}
+	server := http.Server{Addr: s.address, Handler: s.handler, ReadHeaderTimeout: time.Second}
 	go func() {
 		<-ctx.Done()
 		s.logger.Warn("shutting down (context canceled)")

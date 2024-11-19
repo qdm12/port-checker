@@ -1,6 +1,4 @@
 linters-settings:
-  maligned:
-    suggest-new: true
   misspell:
     locale: US
 
@@ -9,12 +7,11 @@ linters:
   enable:
     - asciicheck
     - bodyclose
-    - deadcode
+    - copyloopvar
     - dogsled
     - dupl
     - errcheck
     - exhaustive
-    - exportloopref
     - gochecknoglobals
     - gochecknoinits
     - gocognit
@@ -24,35 +21,23 @@ linters:
     - godot
     - goheader
     - goimports
-    - golint
-    - gomnd
     - goprintffuncname
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
-    - maligned
     - misspell
+    - mnd
     - nakedret
     - nestif
     - noctx
     - nolintlint
     - prealloc
     - rowserrcheck
-    - scopelint
     - sqlclosecheck
     - staticcheck
-    - structcheck
-    - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
-
-run:
-  skip-dirs:
-    - .devcontainer
-    - .github
