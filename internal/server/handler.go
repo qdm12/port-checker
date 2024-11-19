@@ -24,7 +24,8 @@ type handlers struct {
 }
 
 func newHandler(rootURL, templateStr string, logger logging.Logger,
-	ipManager clientip.Extractor) (h http.Handler, err error) {
+	ipManager clientip.Extractor,
+) (h http.Handler, err error) {
 	indexTemplate, err := template.New("index.html").Parse(templateStr)
 	if err != nil {
 		return nil, err
