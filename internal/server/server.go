@@ -6,9 +6,9 @@ import (
 )
 
 func New(address, rootURL, templateStr string,
-	logger Logger, ipManager RequestParser,
+	logger Logger,
 ) (s *httpserver.Server, err error) {
-	handler, err := newHandler(rootURL, templateStr, logger, ipManager)
+	handler, err := newHandler(rootURL, templateStr, logger)
 	if err != nil {
 		return nil, err
 	}

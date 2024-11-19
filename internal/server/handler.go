@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/avct/uasurfer"
+	"github.com/qdm12/port-checker/internal/clientip"
 )
 
 type handlers struct {
@@ -15,15 +16,12 @@ type handlers struct {
 	rootURL string
 	// Objects
 	logger        Logger
-	ipManager     RequestParser
 	indexTemplate *template.Template
 	// Mockable functions
 	timeNow func() time.Time
 }
 
-func newHandler(rootURL, templateStr string, logger Logger,
-	ipManager RequestParser,
-) (h http.Handler, err error) {
+func newHandler(rootURL, templateStr string, logger Logger) (h http.Handler, err error) {
 	indexTemplate, err := template.New("index.html").Parse(templateStr)
 	if err != nil {
 		return nil, err
@@ -34,7 +32,6 @@ func newHandler(rootURL, templateStr string, logger Logger,
 	return &handlers{
 		rootURL:       rootURL,
 		logger:        logger,
-		ipManager:     ipManager,
 		indexTemplate: indexTemplate,
 		timeNow:       time.Now,
 	}, nil
@@ -51,7 +48,12 @@ func (h *handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	browser, device, os := getUserAgentDetails(r.Header.Get("User-Agent"))
-	ip := h.ipManager.ParseHTTPRequest(r)
+	ip, err := clientip.ParseHTTPRequest(r)
+	if err != nil {
+		h.logger.Errorf("cannot parse IP address: %s", err)
+		http.Error(w, "cannot parse IP address", http.StatusInternalServerError)
+		return
+	}
 
 	h.logger.Infof("received request from IP %s (device: %s | %s | %s)",
 		ip, device, os, browser,

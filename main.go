@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/gosettings/reader"
 	"github.com/qdm12/gosplash"
 	"github.com/qdm12/log"
@@ -112,9 +111,7 @@ func _main(ctx context.Context, logger Logger) (err error) {
 	}
 	fmt.Println(settings.String())
 
-	ipManager := clientip.NewParser()
-
-	server, err := server.New(*settings.ListeningAddress, *settings.RootURL, templateStr, logger, ipManager)
+	server, err := server.New(*settings.ListeningAddress, *settings.RootURL, templateStr, logger)
 	if err != nil {
 		return err
 	}
