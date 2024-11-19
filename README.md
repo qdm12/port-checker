@@ -52,12 +52,12 @@ chmod +x port-checker
 ./port-checker -help
 ```
 
-## Environment variables
+## Options
 
-| Environment variable | Default | Possible values | Description |
-| --- | --- | --- | --- |
-| `LISTENING_ADDRESS` | `:8000` | Valid listening address | TCP address to listen on internally |
-| `ROOT_URL` | `/` | URL path string | Used if it is running behind a proxy for example |
+| Environment variable | Flag | Default | Possible values | Description |
+| --- | --- | --- | --- | --- |
+| `LISTENING_ADDRESS` | `--listening-address` | `:8000` | Valid listening address | TCP address to listen on internally |
+| `ROOT_URL` | `--root-url` | `/` | URL path string | Used if it is running behind a proxy for example |
 
 ## Development
 
