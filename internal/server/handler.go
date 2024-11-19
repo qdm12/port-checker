@@ -30,9 +30,7 @@ func newHandler(rootURL, templateStr string, logger Logger,
 		return nil, err
 	}
 
-	for strings.HasSuffix(rootURL, "/") {
-		rootURL = strings.TrimSuffix(rootURL, "/")
-	}
+	rootURL = strings.TrimRight(rootURL, "/")
 
 	return &handlers{
 		rootURL:       rootURL,
