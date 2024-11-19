@@ -34,7 +34,7 @@
     To test port 1234 internally, use:
 
     ```bash
-    docker run -it --rm -e LISTENING_PORT=1234 qmcgaw/port-checker
+    docker run -it --rm -e LISTENING_ADDRESS=":1234" qmcgaw/port-checker
     ```
 
 1. With a client, access [http://localhost:1234](http://localhost:1234).
@@ -56,7 +56,7 @@ chmod +x port-checker
 
 | Environment variable | Default | Possible values | Description |
 | --- | --- | --- | --- |
-| `LISTENING_PORT` | `8000` | `1025` to `65535` | TCP port to listen on internally |
+| `LISTENING_ADDRESS` | `:8000` | Valid listening address | TCP address to listen on internally |
 | `ROOT_URL` | `/` | URL path string | Used if it is running behind a proxy for example |
 
 ## Development

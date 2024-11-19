@@ -11,19 +11,17 @@ import (
 )
 
 type Settings struct {
-	ListeningPort *uint16
-	RootURL       *string
+	ListeningAddress *string
+	RootURL          *string
 }
 
 func (s *Settings) SetDefaults() {
-	const defaultListeningPort = 8000
-	s.ListeningPort = gosettings.DefaultPointer(s.ListeningPort, defaultListeningPort)
+	s.ListeningAddress = gosettings.DefaultPointer(s.ListeningAddress, ":8000")
 	s.RootURL = gosettings.DefaultPointer(s.RootURL, "/")
 }
 
 func (s Settings) Validate() (err error) {
-	address := fmt.Sprintf(":%d", *s.ListeningPort)
-	return validate.ListeningAddress(address, os.Getuid())
+	return validate.ListeningAddress(*s.ListeningAddress, os.Getuid())
 }
 
 func (s Settings) String() string {
@@ -32,15 +30,23 @@ func (s Settings) String() string {
 
 func (s Settings) toLinesNode() *gotree.Node {
 	node := gotree.New("Settings")
-	node.Appendf("Listening port: %d", *s.ListeningPort)
+	node.Appendf("Listening address: %s", *s.ListeningAddress)
 	node.Appendf("Root URL: %s", *s.RootURL)
 	return node
 }
 
+func ptrTo[T any](value T) *T { return &value }
+
 func (s *Settings) Read(reader *reader.Reader) (err error) {
-	s.ListeningPort, err = reader.Uint16Ptr("LISTENING_PORT")
+	// Retro-compatibility
+	port, err := reader.Uint16Ptr("LISTENING_PORT")
 	if err != nil {
 		return err
+	}
+	if port != nil { // Retro-compatibility
+		s.ListeningAddress = ptrTo(fmt.Sprintf(":%d", *port))
+	} else {
+		s.ListeningAddress = reader.Get("LISTENING_ADDRESS")
 	}
 
 	s.RootURL = reader.Get("ROOT_URL")

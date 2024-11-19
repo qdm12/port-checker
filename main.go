@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -98,8 +97,7 @@ func _main(ctx context.Context, logger Logger) (err error) {
 
 	ipManager := clientip.NewExtractor()
 
-	address := "0.0.0.0:" + strconv.FormatUint(uint64(*settings.ListeningPort), 10)
-	server, err := server.New(address, *settings.RootURL, templateStr, logger, ipManager)
+	server, err := server.New(*settings.ListeningAddress, *settings.RootURL, templateStr, logger, ipManager)
 	if err != nil {
 		return err
 	}

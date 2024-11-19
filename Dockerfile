@@ -66,7 +66,7 @@ COPY --from=alpine --chown=1000 /usr/share/zoneinfo /usr/share/zoneinfo
 EXPOSE 8000/tcp
 ENTRYPOINT ["/port-checker"]
 ENV TZ=America/Montreal \
-    LISTENING_PORT=8000 \
+    LISTENING_ADDRESS=:8000 \
     ROOT_URL=/
 ARG UID=1000
 ARG GID=1000
