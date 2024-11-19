@@ -77,11 +77,20 @@ type Logger interface {
 	Errorf(format string, args ...any)
 }
 
+var (
+	version string
+	commit  string //nolint:gochecknoglobals
+	created string //nolint:gochecknoglobals
+)
+
 func _main(ctx context.Context, logger Logger) (err error) {
 	splashSettings := gosplash.Settings{
 		User:       "qdm12",
 		Repository: "port-checker",
 		Emails:     []string{"quentin.mcgaw@gmail.com"},
+		Version:    version,
+		Commit:     commit,
+		Created:    created,
 		// Sponsor information
 		PaypalUser:    "qmcgaw",
 		GithubSponsor: "qdm12",
