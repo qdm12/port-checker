@@ -59,16 +59,6 @@ chmod +x port-checker
 | `LISTENING_ADDRESS` | `--listening-address` | `:8000` | Valid listening address | TCP address to listen on internally |
 | `ROOT_URL` | `--root-url` | `/` | URL path string | Used if it is running behind a proxy for example |
 
-## Development
-
-### Using VSCode and Docker
-
-1. Install [Docker](https://docs.docker.com/install/)
-    - On Windows, share a drive with Docker Desktop and have the project on that partition
-1. With [Visual Studio Code](https://code.visualstudio.com/download), install the [remote containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-1. In Visual Studio Code, press on `F1` and select `Remote-Containers: Open Folder in Container...`
-1. Your dev environment is ready to go!... and it's running in a container :+1:
-
 ## TO DOs
 
 - [ ] Use GeoLite database and Google Maps to show the location
