@@ -9,21 +9,16 @@ builds:
       - -s -w
     env:
       - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - 386
-      - arm64
-      - arm
-      - s390x
-      - ppc64le
-      - riscv64
-    goarm:
-      - 6
-      - 7
+    targets:
+      # See https://goreleaser.com/customization/build/
+      - linux_amd64
+      - linux_386
+      - linux_arm64
+      - darwin_amd64
+      - darwin_arm64
+      - windows_amd64
+      - windows_386
+      - windows_arm64
 archives:
   - format: binary
 checksum:
