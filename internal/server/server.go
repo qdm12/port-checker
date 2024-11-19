@@ -2,12 +2,11 @@
 package server
 
 import (
-	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/goservices/httpserver"
 )
 
 func New(address, rootURL, templateStr string,
-	logger Logger, ipManager clientip.Extractor,
+	logger Logger, ipManager RequestParser,
 ) (s *httpserver.Server, err error) {
 	handler, err := newHandler(rootURL, templateStr, logger, ipManager)
 	if err != nil {

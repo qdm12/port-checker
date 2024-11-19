@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/avct/uasurfer"
-	"github.com/qdm12/golibs/clientip"
 )
 
 type handlers struct {
@@ -16,14 +15,14 @@ type handlers struct {
 	rootURL string
 	// Objects
 	logger        Logger
-	ipManager     clientip.Extractor
+	ipManager     RequestParser
 	indexTemplate *template.Template
 	// Mockable functions
 	timeNow func() time.Time
 }
 
 func newHandler(rootURL, templateStr string, logger Logger,
-	ipManager clientip.Extractor,
+	ipManager RequestParser,
 ) (h http.Handler, err error) {
 	indexTemplate, err := template.New("index.html").Parse(templateStr)
 	if err != nil {
@@ -52,7 +51,7 @@ func (h *handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	browser, device, os := getUserAgentDetails(r.Header.Get("User-Agent"))
-	ip := h.ipManager.HTTPRequest(r)
+	ip := h.ipManager.ParseHTTPRequest(r)
 
 	h.logger.Infof("received request from IP %s (device: %s | %s | %s)",
 		ip, device, os, browser,

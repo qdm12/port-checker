@@ -112,7 +112,7 @@ func _main(ctx context.Context, logger Logger) (err error) {
 	}
 	fmt.Println(settings.String())
 
-	ipManager := clientip.NewExtractor()
+	ipManager := clientip.NewParser()
 
 	server, err := server.New(*settings.ListeningAddress, *settings.RootURL, templateStr, logger, ipManager)
 	if err != nil {
