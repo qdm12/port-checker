@@ -7,54 +7,53 @@ It works on Linux, Windows and OSX.
 ## Requirements
 
 - [VS code](https://code.visualstudio.com/download) installed
-- [VS code remote containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed
+- [VS code dev containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed
 - [Docker](https://www.docker.com/products/docker-desktop) installed and running
-    - If you don't use Linux or WSL 2, share your home directory `~/` and the directory of your project with Docker Desktop
 - [Docker Compose](https://docs.docker.com/compose/install/) installed
-- Ensure your host has the following and that they are accessible by Docker:
-    - `~/.ssh` directory
-    - `~/.gitconfig` file (can be empty)
 
 ## Setup
 
+1. Create the following files and directory on your host if you don't have them:
+
+    ```sh
+    touch ~/.gitconfig ~/.zsh_history
+    mkdir -p ~/.ssh
+    ```
+
+1. **For Docker on OSX**: ensure the project directory and your home directory `~` are accessible by Docker.
 1. Open the command palette in Visual Studio Code (CTRL+SHIFT+P).
-1. Select `Remote-Containers: Open Folder in Container...` and choose the project directory.
+1. Select `Dev Containers: Open Folder in Container...` and choose the project directory.
 
-## Customization
+## Customizations
 
-### Customize the image
+For customizations to take effect, you should "rebuild and reopen":
 
-You can make changes to the [Dockerfile](Dockerfile) and then rebuild the image. For example, your Dockerfile could be:
+1. Open the command palette in Visual Studio Code (CTRL+SHIFT+P)
+2. Select `Dev Containers: Rebuild Container`
 
-```Dockerfile
-FROM qmcgaw/godevcontainer
-USER root
-RUN apk add curl
-USER vscode
-```
+Customizations available are notably:
 
-Note that you may need to use `USER root` to build as root, and then change back to `USER vscode`.
+- Extend the Docker image in [Dockerfile](Dockerfile). For example add curl to it:
 
-To rebuild the image, either:
+    ```Dockerfile
+    FROM qmcgaw/godevcontainer
+    RUN apk add curl
+    ```
 
-- With VSCode through the command palette, select `Remote-Containers: Rebuild and reopen in container`
-- With a terminal, go to this directory and `docker-compose build`
+- Changes to VSCode **settings** and **extensions** in [devcontainer.json](devcontainer.json).
+- Change the entrypoint script by adding a bind mount in [devcontainer.json](devcontainer.json) of a shell script to `/root/.welcome.sh` to replace the [current welcome script](https://github.com/qdm12/godevcontainer/blob/master/shell/.welcome.sh). For example:
 
-### Customize VS code settings
+    ```json
+    // Welcome script
+    {
+        "source": "./.welcome.sh",
+        "target": "/root/.welcome.sh",
+        "type": "bind"
+    },
+    ```
 
-You can customize **settings** and **extensions** in the [devcontainer.json](devcontainer.json) definition file.
-
-### Entrypoint script
-
-You can bind mount a shell script to `/home/vscode/.welcome.sh` to replace the [current welcome script](shell/.welcome.sh).
-
-### Publish a port
-
-To access a port from your host to your development container, publish a port in [docker-compose.yml](docker-compose.yml).
-
-### Run other services
-
-1. Modify [docker-compose.yml](docker-compose.yml) to launch other services at the same time as this development container, such as a test database:
+- Change the `vscode` service container configuration either in [docker-compose.yml](docker-compose.yml) or in [devcontainer.json](devcontainer.json).
+- Add other services in [docker-compose.yml](docker-compose.yml) to run together with the development VSCode service container. For example to add a test database:
 
     ```yml
       database:
@@ -64,5 +63,4 @@ To access a port from your host to your development container, publish a port in
           POSTGRES_PASSWORD: password
     ```
 
-1. In [devcontainer.json](devcontainer.json), change the line `"runServices": ["vscode"],` to `"runServices": ["vscode", "database"],`.
-1. In the VS code command palette, rebuild the container.
+- More customizations available are documented in the [devcontainer.json reference](https://containers.dev/implementors/json_reference/).
