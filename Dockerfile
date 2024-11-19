@@ -41,23 +41,23 @@ FROM --platform=${BUILDPLATFORM} base AS build
 COPY --from=qmcgaw/xcputranslate:v0.4.0 /xcputranslate /usr/local/bin/xcputranslate
 ARG TARGETPLATFORM
 ARG VERSION=unknown
-ARG BUILD_DATE="an unknown date"
+ARG CREATED="an unknown date"
 ARG COMMIT=unknown
 RUN GOARCH="$(xcputranslate -targetplatform ${TARGETPLATFORM} -field arch)" \
     GOARM="$(xcputranslate -targetplatform ${TARGETPLATFORM} -field arm)" \
     go build -trimpath -ldflags="-s -w \
     -X 'main.version=$VERSION' \
-    -X 'main.buildDate=$BUILD_DATE' \
+    -X 'main.created=$CREATED' \
     -X 'main.commit=$COMMIT' \
     " -o app main.go
 
 FROM scratch
-ARG BUILD_DATE
+ARG CREATED
 ARG COMMIT
 ARG VERSION
 LABEL \
     org.opencontainers.image.authors="quentin.mcgaw@gmail.com" \
-    org.opencontainers.image.created=$BUILD_DATE \
+    org.opencontainers.image.created=$CREATED \
     org.opencontainers.image.version=$VERSION \
     org.opencontainers.image.revision=$COMMIT \
     org.opencontainers.image.url="https://github.com/qdm12/port-checker" \
