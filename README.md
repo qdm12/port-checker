@@ -33,6 +33,12 @@ chmod +x port-checker
 ./port-checker --listening-address=":8000" --root-url="/"
 ```
 
+You can build the binary for a specific platform if it's not listed using for example:
+
+```sh
+CGO_ENALBED=0 GOARCH=amd64 go build -o port-checker github.com/qdm12/port-checker
+```
+
 ## Docker image
 
 To test port 1234, use:
