@@ -35,11 +35,11 @@ COPY .golangci.yml ./
 RUN golangci-lint run --timeout=10m
 
 FROM --platform=${BUILDPLATFORM} base AS build
-COPY --from=qmcgaw/xcputranslate:v0.4.0 /xcputranslate /usr/local/bin/xcputranslate
 ARG TARGETPLATFORM
 ARG VERSION=unknown
 ARG CREATED="an unknown date"
 ARG COMMIT=unknown
+RUN echo ${TARGETPLATFORM} && sleep 10
 RUN GOARCH="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field arch)" \
     GOARM="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field arm)" \
     go build -trimpath -ldflags="-s -w \
