@@ -104,11 +104,6 @@ jobs:
           tags: qmcgaw/port-checker:${{ steps.vars.outputs.version }}
           push: true
 
-      - if: github.event.ref == 'refs/heads/master'
-        name: Microbadger hook
-        run: curl -X POST https://hooks.microbadger.com/images/qmcgaw/port-checker/d8zbXT9JDvYGqqm9kx3eUcVCunc=
-        continue-on-error: true
-
       - if: github.event_name == 'release'
         uses: actions/setup-go@v2
         with:
