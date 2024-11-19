@@ -70,5 +70,7 @@ ENV TZ=America/Montreal \
     LISTENING_PORT=8000 \
     ROOT_URL=/
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=2 CMD ["/port-checker","healthcheck"]
-USER 1000
-COPY --from=build --chown=1000 /tmp/gobuild/app /port-checker
+ARG UID=1000
+ARG GID=1000
+USER ${UID}:${GID}
+COPY --from=build --chown=${UID}:${GID} /tmp/gobuild/app /port-checker
