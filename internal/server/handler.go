@@ -52,26 +52,33 @@ func (h *handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	browser, device, os := getUserAgentDetails(r.Header.Get("User-Agent"))
-	ip, err := clientip.ParseHTTPRequest(r)
+	addrPort, err := clientip.ParseHTTPRequest(r)
 	if err != nil {
-		h.logger.Errorf("cannot parse IP address: %s", err)
-		http.Error(w, "cannot parse IP address", http.StatusInternalServerError)
+		h.logger.Errorf("cannot parse ip address port: %s", err)
+		http.Error(w, "cannot parse ip address port", http.StatusInternalServerError)
 		return
 	}
 
+	var clientAddress string
+	if addrPort.Port() == 0 {
+		clientAddress = addrPort.Addr().String()
+	} else {
+		clientAddress = addrPort.String()
+	}
+
 	h.logger.Infof("received request from IP %s (device: %s | %s | %s)",
-		ip, device, os, browser,
+		clientAddress, device, os, browser,
 	)
 
 	htmlData := struct {
 		ListeningAddress string
-		ClientIP         string
+		ClientAddress    string
 		Browser          string
 		Device           string
 		OS               string
 	}{
 		ListeningAddress: h.listeningAddress,
-		ClientIP:         ip.String(),
+		ClientAddress:    clientAddress,
 		Browser:          browser,
 		Device:           device,
 		OS:               os,

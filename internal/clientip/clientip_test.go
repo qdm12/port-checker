@@ -23,7 +23,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 
 	testCases := map[string]struct {
 		request    *http.Request
-		ip         netip.Addr
+		addrPort   netip.AddrPort
 		errWrapped error
 		errMessage string
 	}{
@@ -35,13 +35,13 @@ func Test_ParseHTTPRequest(t *testing.T) {
 			request: &http.Request{
 				RemoteAddr: "99.99.99.99",
 			},
-			ip: netip.AddrFrom4([4]byte{99, 99, 99, 99}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{99, 99, 99, 99}), 0),
 		},
 		"request with remote address": {
 			request: &http.Request{
 				RemoteAddr: "99.99.99.99",
 			},
-			ip: netip.AddrFrom4([4]byte{99, 99, 99, 99}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{99, 99, 99, 99}), 0),
 		},
 		"request with xRealIP header": {
 			request: &http.Request{
@@ -50,7 +50,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Real-IP": {"88.88.88.88"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{88, 88, 88, 88}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{88, 88, 88, 88}), 0),
 		},
 		"request with xRealIP header and public XForwardedFor IP": {
 			request: &http.Request{
@@ -60,7 +60,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"88.88.88.88"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{88, 88, 88, 88}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{88, 88, 88, 88}), 0),
 		},
 		"request with xRealIP header and private XForwardedFor IP": {
 			request: &http.Request{
@@ -70,7 +70,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"10.0.0.5"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{88, 88, 88, 88}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{88, 88, 88, 88}), 0),
 		},
 		"request with single public IP in xForwardedFor header": {
 			request: &http.Request{
@@ -79,7 +79,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"88.88.88.88"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{88, 88, 88, 88}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{88, 88, 88, 88}), 0),
 		},
 		"request with two public IPs in xForwardedFor header": {
 			request: &http.Request{
@@ -88,7 +88,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"88.88.88.88", "77.77.77.77"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{88, 88, 88, 88}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{88, 88, 88, 88}), 0),
 		},
 		"request with private and public IPs in xForwardedFor header": {
 			request: &http.Request{
@@ -97,7 +97,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"192.168.1.5", "88.88.88.88", "10.0.0.1", "77.77.77.77"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{88, 88, 88, 88}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{88, 88, 88, 88}), 0),
 		},
 		"request with single private IP in xForwardedFor header": {
 			request: &http.Request{
@@ -106,7 +106,7 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"192.168.1.5"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{192, 168, 1, 5}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{192, 168, 1, 5}), 0),
 		},
 		"request with private IPs in xForwardedFor header": {
 			request: &http.Request{
@@ -115,14 +115,14 @@ func Test_ParseHTTPRequest(t *testing.T) {
 					"X-Forwarded-For": {"192.168.1.5", "10.0.0.17"},
 				}),
 			},
-			ip: netip.AddrFrom4([4]byte{192, 168, 1, 5}),
+			addrPort: netip.AddrPortFrom(netip.AddrFrom4([4]byte{192, 168, 1, 5}), 0),
 		},
 	}
 	for name, testCase := range testCases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ip, err := ParseHTTPRequest(testCase.request)
-			assert.Equal(t, testCase.ip, ip)
+			assert.Equal(t, testCase.addrPort, ip)
 			assert.ErrorIs(t, err, testCase.errWrapped)
 			if testCase.errWrapped != nil {
 				assert.EqualError(t, err, testCase.errMessage)

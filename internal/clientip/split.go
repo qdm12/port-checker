@@ -1,18 +1,33 @@
 package clientip
 
 import (
+	"errors"
+	"fmt"
+	"math"
 	"net"
 	"net/netip"
+	"strconv"
 	"strings"
 )
 
-func getIPFromHostPort(address string) (ip netip.Addr, err error) {
-	// address can be in the form ipv4:port, ipv6:port, ipv4 or ipv6
-	host, _, err := splitHostPort(address)
+func addrStringToAddrPort(address string) (addrPort netip.AddrPort, err error) {
+	// address can be in the form ipv4:portStr, ipv6:portStr, ipv4 or ipv6
+	host, portStr, err := splitHostPort(address)
 	if err != nil {
 		host = address
 	}
-	return netip.ParseAddr(host)
+	ip, err := netip.ParseAddr(host)
+	if err != nil {
+		return addrPort, fmt.Errorf("parsing IP address: %w", err)
+	}
+	var port uint16
+	if portStr != "" {
+		port, err = parsePort(portStr)
+		if err != nil {
+			return addrPort, fmt.Errorf("parsing port: %w", err)
+		}
+	}
+	return netip.AddrPortFrom(ip, port), nil
 }
 
 func splitHostPort(address string) (ip, port string, err error) {
@@ -34,4 +49,17 @@ func splitHostPort(address string) (ip, port string, err error) {
 	}
 	// IPv4 address
 	return net.SplitHostPort(address)
+}
+
+var ErrPortOutOfRange = errors.New("port is out of range")
+
+func parsePort(s string) (port uint16, err error) {
+	const base, bitSize = 10, 16
+	portUint, err := strconv.ParseUint(s, base, bitSize)
+	if err != nil {
+		return 0, fmt.Errorf("parsing port: %w", err)
+	} else if portUint > math.MaxUint16 {
+		return 0, fmt.Errorf("%w: %d", ErrPortOutOfRange, portUint)
+	}
+	return uint16(portUint), nil
 }
