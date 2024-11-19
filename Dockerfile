@@ -1,6 +1,6 @@
+ARG BUILDPLATFORM=linux/amd64
 ARG ALPINE_VERSION=3.20
 ARG GO_VERSION=1.23
-ARG BUILDPLATFORM=linux/amd64
 ARG XCPUTRANSLATE_VERSION=v0.6.0
 ARG GOLANGCI_LINT_VERSION=v1.61.0
 
@@ -8,9 +8,9 @@ FROM --platform=${BUILDPLATFORM} qmcgaw/xcputranslate:${XCPUTRANSLATE_VERSION} A
 FROM --platform=${BUILDPLATFORM} qmcgaw/binpot:golangci-lint-${GOLANGCI_LINT_VERSION} AS golangci-lint
 
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS base
+WORKDIR /tmp/gobuild
 ENV CGO_ENABLED=0
 RUN apk --update add git g++
-WORKDIR /tmp/gobuild
 COPY --from=xcputranslate /xcputranslate /usr/local/bin/xcputranslate
 COPY --from=golangci-lint /bin /go/bin/golangci-lint
 # Copy repository code and install Go dependencies
@@ -36,7 +36,6 @@ ARG TARGETPLATFORM
 ARG VERSION=unknown
 ARG CREATED="an unknown date"
 ARG COMMIT=unknown
-RUN echo ${TARGETPLATFORM} && sleep 10
 RUN GOARCH="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field arch)" \
     GOARM="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field arm)" \
     go build -trimpath -ldflags="-s -w \
@@ -46,9 +45,17 @@ RUN GOARCH="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field a
     " -o app main.go
 
 FROM scratch
-ARG CREATED
-ARG COMMIT
-ARG VERSION
+EXPOSE 8000/tcp
+ARG UID=1000
+ARG GID=1000
+USER ${UID}:${GID}
+ENTRYPOINT ["/port-checker"]
+ENV TZ=America/Montreal \
+    LISTENING_ADDRESS=:8000 \
+    ROOT_URL=/
+ARG VERSION=unknown
+ARG CREATED="an unknown date"
+ARG COMMIT=unknown
 LABEL \
     org.opencontainers.image.authors="quentin.mcgaw@gmail.com" \
     org.opencontainers.image.created=$CREATED \
@@ -58,14 +65,5 @@ LABEL \
     org.opencontainers.image.documentation="https://github.com/qdm12/port-checker/blob/master/README.md" \
     org.opencontainers.image.source="https://github.com/qdm12/port-checker" \
     org.opencontainers.image.title="port-checker" \
-    org.opencontainers.image.description="3MB container to check a port works with a Golang server"
-COPY --from=alpine --chown=1000 /usr/share/zoneinfo /usr/share/zoneinfo
-EXPOSE 8000/tcp
-ENTRYPOINT ["/port-checker"]
-ENV TZ=America/Montreal \
-    LISTENING_ADDRESS=:8000 \
-    ROOT_URL=/
-ARG UID=1000
-ARG GID=1000
-USER ${UID}:${GID}
+    org.opencontainers.image.description="8MB container to check a port works with a Golang server"
 COPY --from=build --chown=${UID}:${GID} /tmp/gobuild/app /port-checker
