@@ -16,12 +16,16 @@
 
 ## Features
 
-- HTTP lightweight server responding with information on your client:
+- Listening address configurable
+- Root URL configurable - useful to test reverse proxies
+- HTTP server responding with information on your client:
   - Client IP (public or private)
   - Browser and version
   - Device type
   - OS and version
-- Compatible with amd64, 386, armv6, armv7 and arm64 v8 cpu architectures
+- Lightweight program of around **8MB**
+- Docker image is compatible with amd64, 386, arm64, arm/v6, arm/v7, s390x, ppc64le and riscv64
+- Standalone binaries pre-built for each release for Linux (amd64, 386, arm64), Darwin (amd64, arm64) and Windows (amd64, 386, arm64)
 
 ## Standalone binary
 
