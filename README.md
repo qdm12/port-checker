@@ -23,34 +23,31 @@
   - OS and version
 - Compatible with amd64, 386, armv6, armv7 and arm64 v8 cpu architectures
 
-## Setup
+## Standalone binary
 
-1. To test port 1234, use:
-
-    ```bash
-    docker run -it --rm -p 1234:8000/tcp qmcgaw/port-checker
-    ```
-
-    To test port 1234 internally, use:
-
-    ```bash
-    docker run -it --rm -e LISTENING_ADDRESS=":1234" qmcgaw/port-checker
-    ```
-
-1. With a client, access [http://localhost:1234](http://localhost:1234).
-You can also port forward with your router to test it is accessible remotely.
-
-### Binary
-
-You can also download one of the binaries on the Github releases. For example:
+You can download one of the binaries attached with each Github release. For example:
 
 ```sh
 wget -qO port-checker https://github.com/qdm12/port-checker/releases/download/v0.1.0/port-checker_0.1.0_linux_amd64
 chmod +x port-checker
-./port-checker
-# Usage with
-./port-checker -help
+./port-checker --listening-address=":8000" --root-url="/"
 ```
+
+## Docker image
+
+To test port 1234, use:
+
+```sh
+docker run --rm -p 1234:8000/tcp qmcgaw/port-checker
+```
+
+To test port 1234 internally, use:
+
+```bash
+docker run --rm -e LISTENING_ADDRESS=":1234" qmcgaw/port-checker
+```
+
+💁 There are also image tags, such as `:v0.1.0`, corresponding to each tagged release.
 
 ## Options
 
