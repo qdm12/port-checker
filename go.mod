@@ -1,4 +1,4 @@
-module port-checker
+module github.com/qdm12/port-checker
 
 go 1.23
 

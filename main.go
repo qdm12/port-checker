@@ -13,12 +13,11 @@ import (
 	"syscall"
 	"time"
 
-	"port-checker/internal/config"
-	"port-checker/internal/health"
-	"port-checker/internal/server"
-
 	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/golibs/logging"
+	"github.com/qdm12/port-checker/internal/config"
+	"github.com/qdm12/port-checker/internal/health"
+	"github.com/qdm12/port-checker/internal/server"
 )
 
 func main() {
