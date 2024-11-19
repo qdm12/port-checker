@@ -35,21 +35,8 @@ jobs:
       - name: Linting
         run: docker build --target lint .
 
-      - name: Build test image
-        run: docker build --target test -t test-container .
-
-      - name: Run tests in test container
-        run: |
-          touch coverage.txt
-          docker run --rm \
-          -v "$(pwd)/coverage.txt:/tmp/gobuild/coverage.txt" \
-          test-container \
-          go test \
-          -race \
-          -coverpkg=./... \
-          -coverprofile=coverage.txt \
-          -covermode=atomic \
-          ./...
+      - name: Run tests
+        run: docker build --target test .
 
       # We run this here to use the caching of the previous steps
       - name: Build final image
