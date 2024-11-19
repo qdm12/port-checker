@@ -89,7 +89,7 @@ jobs:
           push: true
 
       - if: github.event_name == 'release'
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: 1.23
 
@@ -97,6 +97,6 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
-          args: release --config .gorelease.yml --rm-dist
+          args: release --clean --config .gorelease.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
