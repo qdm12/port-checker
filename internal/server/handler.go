@@ -13,7 +13,8 @@ import (
 
 type handlers struct {
 	// Config
-	rootURL string
+	listeningAddress string
+	rootURL          string
 	// Objects
 	logger        Logger
 	indexTemplate *template.Template
@@ -21,7 +22,9 @@ type handlers struct {
 	timeNow func() time.Time
 }
 
-func newHandler(rootURL, templateStr string, logger Logger) (h http.Handler, err error) {
+func newHandler(listeningAddress, rootURL, templateStr string,
+	logger Logger,
+) (h http.Handler, err error) {
 	indexTemplate, err := template.New("index.html").Parse(templateStr)
 	if err != nil {
 		return nil, err
@@ -30,10 +33,11 @@ func newHandler(rootURL, templateStr string, logger Logger) (h http.Handler, err
 	rootURL = strings.TrimRight(rootURL, "/")
 
 	return &handlers{
-		rootURL:       rootURL,
-		logger:        logger,
-		indexTemplate: indexTemplate,
-		timeNow:       time.Now,
+		listeningAddress: listeningAddress,
+		rootURL:          rootURL,
+		logger:           logger,
+		indexTemplate:    indexTemplate,
+		timeNow:          time.Now,
 	}, nil
 }
 
@@ -60,15 +64,17 @@ func (h *handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 
 	htmlData := struct {
-		ClientIP string
-		Browser  string
-		Device   string
-		OS       string
+		ListeningAddress string
+		ClientIP         string
+		Browser          string
+		Device           string
+		OS               string
 	}{
-		ClientIP: ip.String(),
-		Browser:  browser,
-		Device:   device,
-		OS:       os,
+		ListeningAddress: h.listeningAddress,
+		ClientIP:         ip.String(),
+		Browser:          browser,
+		Device:           device,
+		OS:               os,
 	}
 
 	if err := h.indexTemplate.ExecuteTemplate(w, "index.html", htmlData); err != nil {
