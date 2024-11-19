@@ -7,17 +7,16 @@ import (
 	"time"
 
 	"github.com/qdm12/golibs/clientip"
-	"github.com/qdm12/golibs/logging"
 )
 
 type Server struct {
 	address string
-	logger  logging.Logger
+	logger  Logger
 	handler http.Handler
 }
 
 func New(address, rootURL, templateStr string,
-	logger logging.Logger, ipManager clientip.Extractor,
+	logger Logger, ipManager clientip.Extractor,
 ) (s *Server, err error) {
 	handler, err := newHandler(rootURL, templateStr, logger, ipManager)
 	if err != nil {
@@ -40,10 +39,10 @@ func (s *Server) Run(ctx context.Context, crashed chan<- error) {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownGraceDuration)
 		defer cancel()
 		if err := server.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
-			s.logger.Error("failed shutting down: %s", err)
+			s.logger.Errorf("failed shutting down: %s", err)
 		}
 	}()
 
-	s.logger.Info("listening on %s", s.address)
+	s.logger.Infof("listening on %s", s.address)
 	crashed <- server.ListenAndServe()
 }

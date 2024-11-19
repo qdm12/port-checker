@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/qdm12/golibs/clientip"
-	"github.com/qdm12/golibs/logging"
+	"github.com/qdm12/log"
 	"github.com/qdm12/port-checker/internal/config"
 	"github.com/qdm12/port-checker/internal/server"
 )
@@ -23,7 +23,7 @@ func main() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 
-	logger := logging.New(logging.StdLog)
+	logger := log.New()
 
 	errorCh := make(chan error)
 	go func() {
@@ -43,11 +43,11 @@ func main() {
 		if err == nil { // expected exit
 			os.Exit(0)
 		}
-		logger.Warn("Fatal error:", err)
+		logger.Warnf("Fatal error: %s", err)
 		os.Exit(1)
 	case signal := <-signalsCh:
 		fmt.Println()
-		logger.Warn("Shutting down: signal", signal)
+		logger.Warnf("Shutting down: signal %s", signal)
 	}
 
 	cancel()
@@ -71,7 +71,13 @@ var templateStr string
 
 var ErrPortOutOfRange = errors.New("port is out of range")
 
-func _main(ctx context.Context, args []string, logger logging.Logger) error {
+type Logger interface {
+	Infof(format string, args ...any)
+	Warn(message string)
+	Errorf(format string, args ...any)
+}
+
+func _main(ctx context.Context, args []string, logger Logger) error {
 	fmt.Println("#################################")
 	fmt.Println("######### Port Checker ##########")
 	fmt.Println("######## by Quentin McGaw #######")
