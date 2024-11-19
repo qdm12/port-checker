@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/qdm12/gosettings/reader"
 	"github.com/qdm12/gosplash"
