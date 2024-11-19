@@ -12,6 +12,7 @@ import (
 
 	"github.com/qdm12/golibs/clientip"
 	"github.com/qdm12/gosettings/reader"
+	"github.com/qdm12/gosplash"
 	"github.com/qdm12/log"
 	"github.com/qdm12/port-checker/internal/config"
 	"github.com/qdm12/port-checker/internal/server"
@@ -77,12 +78,18 @@ type Logger interface {
 }
 
 func _main(ctx context.Context, logger Logger) (err error) {
-	fmt.Println("#################################")
-	fmt.Println("######### Port Checker ##########")
-	fmt.Println("######## by Quentin McGaw #######")
-	fmt.Println("######## Give some ❤️ at #########")
-	fmt.Println("# github.com/qdm12/port-checker #")
-	fmt.Print("#################################\n\n")
+	splashSettings := gosplash.Settings{
+		User:       "qdm12",
+		Repository: "port-checker",
+		Emails:     []string{"quentin.mcgaw@gmail.com"},
+		// Sponsor information
+		PaypalUser:    "qmcgaw",
+		GithubSponsor: "qdm12",
+	}
+	for _, line := range gosplash.MakeLines(splashSettings) {
+		fmt.Println(line)
+	}
+
 	reader := reader.New(reader.Settings{})
 	var settings config.Settings
 	err = settings.Read(reader)

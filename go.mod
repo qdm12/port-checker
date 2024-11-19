@@ -7,6 +7,7 @@ require (
 	github.com/qdm12/golibs v0.0.0-20210215133151-c711ebd3e56a
 	github.com/qdm12/goservices v0.1.0
 	github.com/qdm12/gosettings v0.4.4
+	github.com/qdm12/gosplash v0.2.0
 	github.com/qdm12/gotree v0.3.0
 	github.com/qdm12/log v0.1.0
 )
