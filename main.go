@@ -94,6 +94,7 @@ func _main(ctx context.Context, logger Logger) (err error) {
 	if err != nil {
 		return fmt.Errorf("validating settings: %w", err)
 	}
+	fmt.Println(settings.String())
 
 	ipManager := clientip.NewExtractor()
 
