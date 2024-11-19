@@ -1,6 +1,9 @@
 ARG ALPINE_VERSION=3.20
 ARG GO_VERSION=1.23
 ARG BUILDPLATFORM=linux/amd64
+ARG XCPUTRANSLATE_VERSION=v0.6.0
+
+FROM --platform=${BUILDPLATFORM} qmcgaw/xcputranslate:${XCPUTRANSLATE_VERSION} AS xcputranslate
 
 FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS alpine
 RUN apk --update add tzdata
@@ -9,6 +12,7 @@ FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS
 ENV CGO_ENABLED=0
 RUN apk --update add git
 WORKDIR /tmp/gobuild
+COPY --from=xcputranslate /xcputranslate /usr/local/bin/xcputranslate
 # Copy repository code and install Go dependencies
 COPY go.mod go.sum ./
 RUN go mod download
@@ -43,8 +47,8 @@ ARG TARGETPLATFORM
 ARG VERSION=unknown
 ARG CREATED="an unknown date"
 ARG COMMIT=unknown
-RUN GOARCH="$(xcputranslate -targetplatform ${TARGETPLATFORM} -field arch)" \
-    GOARM="$(xcputranslate -targetplatform ${TARGETPLATFORM} -field arm)" \
+RUN GOARCH="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field arch)" \
+    GOARM="$(xcputranslate translate -targetplatform ${TARGETPLATFORM} -field arm)" \
     go build -trimpath -ldflags="-s -w \
     -X 'main.version=$VERSION' \
     -X 'main.created=$CREATED' \
